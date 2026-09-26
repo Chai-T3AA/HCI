@@ -7,40 +7,29 @@
  * getWeeklyStats/getWeekWorkload over the shared activity list, so this
  * page is always in sync with whatever was just added/edited elsewhere.
  */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ListChecks, Clock4, AlertCircle, TrendingUp, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import DashboardCard from '../components/DashboardCard';
 import WorkloadOverview from '../components/WorkloadOverview';
+import PriorityBreakdown from '../components/PriorityBreakdown';
 import ActivityCard from '../components/ActivityCard';
 import AddActivityModal from '../components/AddActivityModal';
 import ActivityDetails from '../components/ActivityDetails';
 import { useActivities } from '../context/ActivityContext';
+import { useSettings } from '../context/SettingsContext';
 import { addDays, getWeekDays, formatWeekRangeLong, DAY_NAMES, toDateKey } from '../utils/dateUtils';
 import { getWeeklyStats } from '../utils/workloadUtils';
 
-function useDisplayName() {
-  const [name, setName] = useState('Student');
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('timewise.settings.v1');
-      if (raw) setName(JSON.parse(raw).name || 'Student');
-    } catch {
-      /* ignore malformed settings, fall back to default */
-    }
-  }, []);
-  return name;
-}
-
 export default function Dashboard() {
   const { activities, deleteActivity, toggleComplete } = useActivities();
-  const name = useDisplayName();
+  const { settings, weekStartsOn } = useSettings();
   const [weekAnchor, setWeekAnchor] = useState(new Date());
   const [modalOpen, setModalOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
   const [detailsActivity, setDetailsActivity] = useState(null);
 
-  const weekDays = getWeekDays(weekAnchor);
-  const stats = getWeeklyStats(activities, weekDays);
+  const weekDays = getWeekDays(weekAnchor, weekStartsOn);
+  const stats = getWeeklyStats(activities, weekDays, settings.maxWorkloadPerDay);
   const weekKeys = new Set(weekDays.map(toDateKey));
   const weekActivities = activities
     .filter((a) => weekKeys.has(a.date))
@@ -57,11 +46,11 @@ export default function Dashboard() {
       {/* Header + week selector */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl text-navy">Good morning, {name}</h1>
+          <h1 className="font-serif text-3xl text-navy">Good morning, {settings.name}</h1>
           <p className="text-navy/60 mt-1">Here's what your week looks like.</p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white/70 border border-navy/10 rounded-lg px-3 py-2 shadow-soft">
+        <div className="flex items-center gap-2 w-full sm:w-auto bg-white/70 border border-navy/10 rounded-lg px-3 py-2 shadow-soft">
           <button onClick={() => setWeekAnchor((d) => addDays(d, -7))} className="text-navy/50 hover:text-navy">
             <ChevronLeft size={16} />
           </button>
@@ -87,8 +76,14 @@ export default function Dashboard() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
+        {/* flex flex-col + the two cards below both being flex-1 is what
+            closes the gap that used to sit under Workload Overview: this
+            column now stretches to match the taller activities list on the
+            right, and the two cards share that height instead of leaving
+            empty cream space beneath a single fixed-height card. */}
+        <div className="lg:col-span-1 flex flex-col gap-6">
           <WorkloadOverview weekWorkload={stats.weekWorkload} />
+          <PriorityBreakdown activities={weekActivities} />
         </div>
 
         {/* Weekly planner preview */}

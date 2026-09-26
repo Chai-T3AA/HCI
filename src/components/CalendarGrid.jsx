@@ -16,7 +16,7 @@ import { AlertTriangle } from 'lucide-react';
 import CalendarEvent from './CalendarEvent';
 import { DAY_SHORT, isToday, timeToDecimal, toDateKey, deadlineLabel } from '../utils/dateUtils';
 import { layoutDayActivities } from '../utils/scheduling';
-import { getHoursForDate, getWorkloadLevel, WORKLOAD_LABEL } from '../utils/workloadUtils';
+import { getHoursForDate, getWorkloadLevel, isOverloaded, WORKLOAD_LABEL } from '../utils/workloadUtils';
 
 export const GRID_START_HOUR = 7;
 export const GRID_END_HOUR = 22;
@@ -49,7 +49,7 @@ function decimalHourToTimeString(decimal) {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-export default function CalendarGrid({ days, activities, onSlotClick, onEventClick, onMoveActivity }) {
+export default function CalendarGrid({ days, activities, maxWorkloadPerDay, onSlotClick, onEventClick, onMoveActivity }) {
   const [now, setNow] = useState(new Date());
   const scrollRef = useRef(null);
 
@@ -97,21 +97,33 @@ export default function CalendarGrid({ days, activities, onSlotClick, onEventCli
           const dateKey = toDateKey(day);
           const hours = getHoursForDate(activities, dateKey);
           const level = getWorkloadLevel(hours);
+          const overloaded = isOverloaded(hours, maxWorkloadPerDay);
+          // "Heavy" (generic light/moderate/heavy scale) vs "today" (brand
+          // sandy amber) are visually distinct tokens on purpose — heavy uses
+          // Tailwind's true orange (amber-500/600/700), today uses the
+          // brand's `amber` DEFAULT. `overloaded` (over the user's own
+          // Settings limit) always wins over both, in red, same as the
+          // Workload Overview bar for this exact day.
+          const heavy = !overloaded && level === 'heavy';
           const today = isToday(day);
+          const headerBg = overloaded ? 'bg-danger/10' : heavy ? 'bg-amber-500/10' : today ? 'bg-amber/10' : '';
+          const dateColor = overloaded ? 'text-danger' : heavy ? 'text-amber-600' : today ? 'text-amber-700' : 'text-navy';
+          const hoursColor = overloaded ? 'text-danger font-semibold' : heavy ? 'text-amber-600 font-semibold' : 'text-navy/50';
           return (
-            <div
-              key={dateKey}
-              className={`flex-1 min-w-[120px] text-center py-3 border-l border-navy/10 ${
-                today ? 'bg-amber/10' : ''
-              }`}
-            >
+            <div key={dateKey} className={`flex-1 min-w-[120px] text-center py-3 border-l border-navy/10 ${headerBg}`}>
               <p className="text-[11px] font-semibold text-navy/50 tracking-wider">{DAY_SHORT[day.getDay()]}</p>
-              <p className={`font-serif text-xl ${today ? 'text-amber-700' : 'text-navy'}`}>{day.getDate()}</p>
-              <p className="text-[11px] text-navy/50 mt-0.5">{hours > 0 ? `${hours}h` : '—'}</p>
-              {level === 'heavy' && (
-                <span className="inline-flex items-center gap-0.5 text-[9px] text-amber-700 font-semibold">
-                  <AlertTriangle size={9} /> {WORKLOAD_LABEL.heavy}
+              <p className={`font-serif text-xl ${dateColor}`}>{day.getDate()}</p>
+              <p className={`text-[11px] mt-0.5 ${hoursColor}`}>{hours > 0 ? `${hours}h` : '—'}</p>
+              {overloaded ? (
+                <span className="inline-flex items-center gap-0.5 text-[9px] text-danger font-semibold">
+                  <AlertTriangle size={9} /> Over limit
                 </span>
+              ) : (
+                heavy && (
+                  <span className="inline-flex items-center gap-0.5 text-[9px] text-amber-700 font-semibold">
+                    <AlertTriangle size={9} /> {WORKLOAD_LABEL.heavy}
+                  </span>
+                )
               )}
             </div>
           );
@@ -139,8 +151,12 @@ export default function CalendarGrid({ days, activities, onSlotClick, onEventCli
             const dateKey = toDateKey(day);
             const dayActivities = activities.filter((a) => a.date === dateKey);
             const positioned = layoutDayActivities(dayActivities);
+            const dayHours = getHoursForDate(activities, dateKey);
+            const overloaded = isOverloaded(dayHours, maxWorkloadPerDay);
+            const heavy = !overloaded && getWorkloadLevel(dayHours) === 'heavy';
             const today = isToday(day);
             const soonKey = toDateKey(new Date(Date.now() + 86400000));
+            const columnBg = overloaded ? 'bg-danger/5' : heavy ? 'bg-amber-500/5' : today ? 'bg-amber/5' : 'hover:bg-navy/[0.02]';
 
             return (
               <div
@@ -162,9 +178,7 @@ export default function CalendarGrid({ days, activities, onSlotClick, onEventCli
                   const m = Math.round((snapped - h) * 60);
                   onSlotClick(dateKey, `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
                 }}
-                className={`flex-1 min-w-[120px] relative border-l border-navy/10 no-select ${
-                  today ? 'bg-amber/5' : 'hover:bg-navy/[0.02]'
-                }`}
+                className={`flex-1 min-w-[120px] relative border-l border-navy/10 no-select ${columnBg}`}
               >
                 {/* Hour gridlines */}
                 {HOURS.map((hour) => (

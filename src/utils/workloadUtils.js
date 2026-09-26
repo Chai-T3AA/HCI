@@ -30,11 +30,24 @@ export function getWorkloadLevel(hours) {
 export const WORKLOAD_LABEL = { light: 'Light', moderate: 'Moderate', heavy: 'Heavy' };
 
 /**
- * Builds a { date, hours, level, activities } summary for each day in
- * `weekDays`. This one array drives the calendar's per-column workload
- * badges and the Workload Overview bar chart on the dashboard.
+ * True once a day's hours exceed the user's own configured daily limit
+ * (Settings > Scheduling Preferences > "Maximum workload per day"). This is
+ * separate from the light/moderate/heavy scale above — that scale is a
+ * fixed, generic visualization; `overloaded` is the personalized "you set a
+ * limit and blew past it" flag that turns things red in the UI.
+ * `maxWorkloadPerDay` of `null`/`undefined` means "no limit set", so nothing
+ * is ever flagged overloaded in that case.
  */
-export function getWeekWorkload(activities, weekDays) {
+export function isOverloaded(hours, maxWorkloadPerDay) {
+  return typeof maxWorkloadPerDay === 'number' && maxWorkloadPerDay > 0 && hours > maxWorkloadPerDay;
+}
+
+/**
+ * Builds a { date, hours, level, overloaded, activities } summary for each
+ * day in `weekDays`. This one array drives the calendar's per-column
+ * workload badges and the Workload Overview bar chart on the dashboard.
+ */
+export function getWeekWorkload(activities, weekDays, maxWorkloadPerDay) {
   return weekDays.map((date) => {
     const dateKey = toDateKey(date);
     const dayActivities = activities.filter((a) => a.date === dateKey);
@@ -44,6 +57,7 @@ export function getWeekWorkload(activities, weekDays) {
       dateKey,
       hours,
       level: getWorkloadLevel(hours),
+      overloaded: isOverloaded(hours, maxWorkloadPerDay),
       activities: dayActivities,
     };
   });
@@ -52,8 +66,10 @@ export function getWeekWorkload(activities, weekDays) {
 /**
  * Aggregate stats for a week, used by the Dashboard summary cards and the
  * Insights page (total tasks, hours planned, upcoming deadlines, % complete).
+ * `maxWorkloadPerDay` (from Settings) is threaded through to getWeekWorkload
+ * so the `overloaded` flag on each day reflects the user's own limit.
  */
-export function getWeeklyStats(activities, weekDays) {
+export function getWeeklyStats(activities, weekDays, maxWorkloadPerDay) {
   const weekKeys = new Set(weekDays.map(toDateKey));
   const weekActivities = activities.filter((a) => weekKeys.has(a.date));
 
@@ -69,7 +85,7 @@ export function getWeeklyStats(activities, weekDays) {
     (a) => a.deadline && a.deadline >= todayKey && !a.completed
   ).length;
 
-  const weekWorkload = getWeekWorkload(activities, weekDays);
+  const weekWorkload = getWeekWorkload(activities, weekDays, maxWorkloadPerDay);
   const busiest = weekWorkload.reduce((max, d) => (d.hours > (max?.hours ?? -1) ? d : max), null);
   const freest = weekWorkload.reduce((min, d) => (d.hours < (min?.hours ?? Infinity) ? d : min), null);
 

@@ -20,10 +20,16 @@ import { AlertTriangle, Maximize2, Minimize2 } from 'lucide-react';
 import { DAY_SHORT } from '../utils/dateUtils';
 import { WORKLOAD_LABEL } from '../utils/workloadUtils';
 
+// Heavy uses the same true-orange token as the Calendar's "Heavy" day tint
+// (amber-500/600/700, Tailwind's default orange scale — distinct from the
+// brand's sandy `amber` DEFAULT used for "today"). `overloaded` below always
+// wins and uses `danger` (red) — same token the Calendar uses for a day over
+// the user's own limit — so the bar color always matches the calendar cell
+// color for that same day.
 const LEVEL_BAR_CLASS = {
   light: 'bg-haze/50',
   moderate: 'bg-current',
-  heavy: 'bg-navy',
+  heavy: 'bg-amber-500',
 };
 
 /** Sums each day's activities by priority, e.g. { high: 3, medium: 1.5, low: 0 }. */
@@ -60,6 +66,10 @@ export default function WorkloadOverview({ weekWorkload }) {
         {weekWorkload.map((day) => {
           const heightPct = Math.max(6, (day.hours / maxHours) * 100);
           const breakdown = getPriorityBreakdown(day.activities);
+          // `overloaded` (from getWeekWorkload, driven by Settings > Maximum
+          // workload per day) always wins over the generic light/moderate/
+          // heavy scale — it's the user's own limit, not a fixed default.
+          const barClass = day.overloaded ? 'bg-danger' : LEVEL_BAR_CLASS[day.level];
 
           return (
             <div key={day.dateKey} className="flex-1 flex flex-col items-center gap-2 h-full">
@@ -68,7 +78,9 @@ export default function WorkloadOverview({ weekWorkload }) {
                     whole tooltip mechanism — no React state involved. */}
                 <div className="relative group w-full max-w-[28px] h-full flex items-end justify-center">
                   <div
-                    className={`w-full rounded-t-md ${LEVEL_BAR_CLASS[day.level]} transition-all cursor-default`}
+                    className={`w-full rounded-t-md ${barClass} transition-all cursor-default ${
+                      day.overloaded ? 'ring-2 ring-danger/40' : ''
+                    }`}
                     style={{ height: `${heightPct}%` }}
                   />
                   <div
@@ -78,7 +90,9 @@ export default function WorkloadOverview({ weekWorkload }) {
                       opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100
                       transition-all duration-150 pointer-events-none z-20"
                   >
-                    <p className="font-semibold mb-0.5">{day.hours}h total · {WORKLOAD_LABEL[day.level]}</p>
+                    <p className="font-semibold mb-0.5">
+                      {day.hours}h total · {day.overloaded ? 'Over limit' : WORKLOAD_LABEL[day.level]}
+                    </p>
                     <p className="text-cream/80">
                       High {breakdown.high}h · Med {breakdown.medium}h · Low {breakdown.low}h
                     </p>
@@ -88,12 +102,24 @@ export default function WorkloadOverview({ weekWorkload }) {
                 </div>
               </div>
               <span className="text-[10px] font-semibold text-navy/60">{DAY_SHORT[day.date.getDay()]}</span>
-              <span className="text-[10px] text-navy/40">{day.hours}h</span>
-              {day.level === 'heavy' && (
-                <span className="inline-flex items-center gap-0.5 text-[9px] text-amber-700 font-semibold">
-                  <AlertTriangle size={9} /> Heavy
-                </span>
-              )}
+              {/* Status folded into one compact line instead of a separate
+                  badge row underneath: color + icon (when flagged) + hours,
+                  all in a single element. The full "Over limit"/"Heavy"
+                  wording still lives in the tooltip above on hover, so the
+                  icon+color combo here isn't the only place the state is
+                  spelled out — it's just the at-a-glance version. */}
+              <span
+                className={`inline-flex items-center gap-0.5 text-[10px] ${
+                  day.overloaded
+                    ? 'text-danger font-semibold'
+                    : day.level === 'heavy'
+                    ? 'text-amber-600 font-semibold'
+                    : 'text-navy/40'
+                }`}
+              >
+                {(day.overloaded || day.level === 'heavy') && <AlertTriangle size={9} />}
+                {day.hours}h
+              </span>
             </div>
           );
         })}

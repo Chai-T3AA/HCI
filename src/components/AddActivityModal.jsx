@@ -17,24 +17,32 @@
 import { useEffect, useMemo, useState } from 'react';
 import { X, Sparkles } from 'lucide-react';
 import { useActivities } from '../context/ActivityContext';
+import { useSettings } from '../context/SettingsContext';
 import { getSmartRecommendations } from '../utils/scheduling';
 import { toDateKey } from '../utils/dateUtils';
 import { CATEGORIES, PRIORITIES } from '../data/mockData';
 import SuggestedTimeSlots from './SuggestedTimeSlots';
 
-const emptyForm = {
-  name: '',
-  date: toDateKey(new Date()),
-  startTime: '09:00',
-  duration: 1,
-  deadline: '',
-  priority: 'medium',
-  category: CATEGORIES[0],
-};
+function makeEmptyForm(defaultDuration) {
+  return {
+    name: '',
+    date: toDateKey(new Date()),
+    startTime: '09:00',
+    // Was hardcoded to 1 — Settings > Scheduling Preferences > "Default
+    // new-activity duration" was saved but nothing ever read it back, so
+    // changing it had no visible effect anywhere. Now every new (non-edit)
+    // activity starts from the user's own configured default.
+    duration: defaultDuration ?? 1,
+    deadline: '',
+    priority: 'medium',
+    category: CATEGORIES[0],
+  };
+}
 
 export default function AddActivityModal({ open, onClose, activityToEdit, defaultDate, defaultStartTime }) {
   const { activities, addActivity, updateActivity } = useActivities();
-  const [form, setForm] = useState(emptyForm);
+  const { settings } = useSettings();
+  const [form, setForm] = useState(() => makeEmptyForm(settings.defaultDuration));
   const [selectedSuggestionKey, setSelectedSuggestionKey] = useState(null);
 
   const isEditing = Boolean(activityToEdit);
@@ -52,13 +60,15 @@ export default function AddActivityModal({ open, onClose, activityToEdit, defaul
         category: activityToEdit.category,
       });
     } else {
+      const base = makeEmptyForm(settings.defaultDuration);
       setForm({
-        ...emptyForm,
-        date: defaultDate ?? emptyForm.date,
-        startTime: defaultStartTime ?? emptyForm.startTime,
+        ...base,
+        date: defaultDate ?? base.date,
+        startTime: defaultStartTime ?? base.startTime,
       });
     }
     setSelectedSuggestionKey(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, activityToEdit, defaultDate, defaultStartTime]);
 
   // Recompute recommendations whenever the inputs that drive them change.

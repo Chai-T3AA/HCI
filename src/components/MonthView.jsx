@@ -7,21 +7,22 @@
  * plus a "+N more" overflow indicator. Clicking a day jumps the parent to
  * Day view for that date; clicking an activity chip opens its details.
  */
-import { addDays, startOfWeek, toDateKey, isToday, DAY_SHORT } from '../utils/dateUtils';
+import { addDays, startOfWeek, toDateKey, isToday, getOrderedDayLabels } from '../utils/dateUtils';
 
 const PRIORITY_DOT = { high: 'bg-navy', medium: 'bg-current', low: 'bg-haze' };
 
-export default function MonthView({ monthDate, activities, onSelectDay, onEventClick }) {
+export default function MonthView({ monthDate, activities, weekStartsOn = 1, onSelectDay, onEventClick }) {
   const year = monthDate.getFullYear();
   const month = monthDate.getMonth();
   const firstOfMonth = new Date(year, month, 1);
-  const gridStart = startOfWeek(firstOfMonth);
+  const gridStart = startOfWeek(firstOfMonth, weekStartsOn);
   const cells = Array.from({ length: 42 }, (_, i) => addDays(gridStart, i));
+  const headerLabels = getOrderedDayLabels(weekStartsOn);
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="grid grid-cols-7 border-b border-navy/10 pb-2 mb-1">
-        {DAY_SHORT.map((d) => (
+        {headerLabels.map((d) => (
           <div key={d} className="text-center text-[11px] font-semibold text-navy/50 tracking-wider">
             {d}
           </div>

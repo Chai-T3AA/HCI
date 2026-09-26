@@ -9,6 +9,10 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  // 'class' (not the default 'media') means dark mode is driven by adding
+  // a `dark` class to <html> — see SettingsContext, which toggles it based
+  // on the user's Appearance setting rather than their OS preference.
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -36,6 +40,17 @@ export default {
         cream: {
           DEFAULT: '#FCEDD3', // Light Cream - page/card/modal backgrounds
           50: '#FFFBF4',
+        },
+        // Muted brick-red "alert" color — used ONLY for the workload-exceeded
+        // feature (a day going over the user's Settings > Max Workload limit).
+        // Deliberately not a neon/pure red so it stays in the same warm,
+        // editorial register as the rest of the palette instead of looking
+        // like a generic SaaS error state.
+        danger: {
+          DEFAULT: '#B3423A',
+          50: '#F8E7E4',
+          100: '#F0CDC7',
+          700: '#8A322C',
         },
       },
       fontFamily: {

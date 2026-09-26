@@ -9,13 +9,15 @@
 import ProgressCard from '../components/ProgressCard';
 import WorkloadOverview from '../components/WorkloadOverview';
 import { useActivities } from '../context/ActivityContext';
+import { useSettings } from '../context/SettingsContext';
 import { getWeekDays, DAY_NAMES } from '../utils/dateUtils';
 import { getWeeklyStats } from '../utils/workloadUtils';
 
 export default function Insights() {
   const { activities } = useActivities();
-  const weekDays = getWeekDays(new Date());
-  const stats = getWeeklyStats(activities, weekDays);
+  const { settings, weekStartsOn } = useSettings();
+  const weekDays = getWeekDays(new Date(), weekStartsOn);
+  const stats = getWeeklyStats(activities, weekDays, settings.maxWorkloadPerDay);
 
   const busiestLabel = stats.busiestDay && stats.busiestDay.hours > 0 ? DAY_NAMES[stats.busiestDay.date.getDay()] : '—';
   const freestLabel = stats.freestDay ? DAY_NAMES[stats.freestDay.date.getDay()] : '—';

@@ -20,6 +20,7 @@ import {
   User, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { useActivities } from '../context/ActivityContext';
+import { useSettings } from '../context/SettingsContext';
 import { getWeekDays } from '../utils/dateUtils';
 import { getWeeklyStats } from '../utils/workloadUtils';
 
@@ -33,7 +34,8 @@ const NAV_ITEMS = [
 
 export default function Sidebar({ open = false, onClose }) {
   const { activities } = useActivities();
-  const stats = getWeeklyStats(activities, getWeekDays(new Date()));
+  const { settings, weekStartsOn } = useSettings();
+  const stats = getWeeklyStats(activities, getWeekDays(new Date(), weekStartsOn), settings.maxWorkloadPerDay);
   const [collapsed, setCollapsed] = useState(false); // desktop-only "tiny rail" mode
 
   return (
@@ -116,7 +118,7 @@ export default function Sidebar({ open = false, onClose }) {
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <p className="text-sm font-medium truncate">Student</p>
+              <p className="text-sm font-medium truncate">{settings.name}</p>
               <p className="text-xs text-cream/50 truncate">student@campus.edu</p>
             </div>
           )}

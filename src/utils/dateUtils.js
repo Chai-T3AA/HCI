@@ -35,18 +35,35 @@ export function addDays(date, amount) {
   return d;
 }
 
-/** Returns the Monday that starts the week containing `date`. */
-export function startOfWeek(date) {
+/**
+ * Returns the date that starts the week containing `date`.
+ * `weekStartsOn` follows JS's Date.getDay() numbering (0 = Sunday, 1 = Monday,
+ * ... 6 = Saturday) and defaults to Monday — but every caller that has
+ * access to the user's "Week starts on Monday" setting (SettingsContext)
+ * should pass `settings.weekStartsOn` explicitly so the calendar, dashboard
+ * and insights pages all agree with what the user picked.
+ */
+export function startOfWeek(date, weekStartsOn = 1) {
   const d = new Date(date);
-  const day = d.getDay(); // 0 = Sunday ... 6 = Saturday
-  const diff = day === 0 ? -6 : 1 - day; // shift so Monday is day 0 of the week
-  return addDays(d, diff);
+  const day = d.getDay();
+  const diff = (day - weekStartsOn + 7) % 7; // how many days after weekStartsOn `day` falls
+  return addDays(d, -diff);
 }
 
-/** Returns an array of 7 Dates, Monday through Sunday, for the week containing `date`. */
-export function getWeekDays(date) {
-  const monday = startOfWeek(date);
-  return Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+/** Returns an array of 7 Dates for the week containing `date`, starting on `weekStartsOn`. */
+export function getWeekDays(date, weekStartsOn = 1) {
+  const start = startOfWeek(date, weekStartsOn);
+  return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+}
+
+/**
+ * DAY_SHORT/DAY_NAMES are always stored Sunday-first (matching Date.getDay()
+ * indices) so `DAY_SHORT[date.getDay()]` keeps working everywhere. When you
+ * need a header row in week-start order instead (e.g. MonthView's "SUN MON
+ * TUE..." vs "MON TUE...SUN" heading), use this to reorder them.
+ */
+export function getOrderedDayLabels(weekStartsOn = 1, labels = DAY_SHORT) {
+  return Array.from({ length: 7 }, (_, i) => labels[(weekStartsOn + i) % 7]);
 }
 
 export function isSameDay(a, b) {

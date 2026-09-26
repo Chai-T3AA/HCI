@@ -17,7 +17,94 @@ html, body, #root {
 }
 
 body {
-  @apply bg-cream text-navy font-sans antialiased;
+  @apply bg-cream text-navy font-sans antialiased transition-colors duration-200;
+}
+
+/**
+ * DARK MODE
+ * ---------
+ * Rather than adding a `dark:` variant to every single className across ~20
+ * component files, these rules override the handful of *utility classes*
+ * that stand in for "page/card surface" and "primary text" throughout the
+ * app (bg-cream, bg-white/NN, text-navy and its opacity variants,
+ * border-navy/NN) whenever an ancestor has the `dark` class — which
+ * SettingsContext toggles on <html> based on Settings > Appearance.
+ *
+ * This works because a selector like `.dark .text-navy` (specificity 0,2,0)
+ * always beats Tailwind's own `.text-navy` (0,1,0), regardless of source
+ * order — so existing components don't need to change at all, they just
+ * automatically theme.
+ *
+ * Deliberately NOT overridden: solid `bg-navy` (sidebar, primary buttons,
+ * high-priority badges) and `text-cream`/`border-cream` (always used on top
+ * of the navy sidebar, which stays navy in both themes) — those are brand
+ * accents that should look the same regardless of light/dark, only the
+ * cream *page* and navy *body text* need to flip.
+ */
+.dark body {
+  background-color: #0b1229;
+}
+
+.dark .bg-cream {
+  background-color: #0b1229;
+}
+.dark .bg-cream\/50 {
+  background-color: rgba(20, 27, 61, 0.5);
+}
+.dark .bg-cream\/5 {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.dark .bg-white\/70,
+.dark .bg-white\/80,
+.dark .bg-white\/60 {
+  background-color: #141b3d;
+}
+
+.dark .text-navy {
+  color: #f3ecdd;
+}
+.dark .text-navy\/80 {
+  color: rgba(243, 236, 221, 0.85);
+}
+.dark .text-navy\/70 {
+  color: rgba(243, 236, 221, 0.75);
+}
+.dark .text-navy\/60 {
+  color: rgba(243, 236, 221, 0.65);
+}
+.dark .text-navy\/50 {
+  color: rgba(243, 236, 221, 0.55);
+}
+.dark .text-navy\/40 {
+  color: rgba(243, 236, 221, 0.45);
+}
+.dark .text-navy\/30 {
+  color: rgba(243, 236, 221, 0.32);
+}
+
+.dark .border-navy,
+.dark .border-navy\/20,
+.dark .border-navy\/15,
+.dark .border-navy\/10,
+.dark .border-navy\/5 {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .bg-navy\/5,
+.dark .bg-navy\/\[0\.02\] {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+.dark .bg-navy\/10 {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+.dark .shadow-soft {
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Thin, unobtrusive scrollbars for the calendar grid and sidebar */
@@ -44,4 +131,8 @@ body {
     @apply w-full rounded-lg border border-navy/15 bg-white/80 px-3 py-2 text-sm text-navy
       focus:outline-none focus:ring-2 focus:ring-current/40 focus:border-current transition-shadow;
   }
+}
+
+.dark .bg-white\/80 {
+  background-color: #141b3d;
 }
