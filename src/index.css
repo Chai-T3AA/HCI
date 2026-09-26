@@ -1,0 +1,47 @@
+/**
+ * GLOBAL STYLES
+ * -------------
+ * Loads the two brand fonts (serif for headings, sans for UI), pulls in
+ * Tailwind's base/components/utilities layers, and sets sane page-wide
+ * defaults (background color, font smoothing, custom scrollbar) so every
+ * page starts from the same visual baseline.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  @apply bg-cream text-navy font-sans antialiased;
+}
+
+/* Thin, unobtrusive scrollbars for the calendar grid and sidebar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(16, 42, 107, 0.2);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Small helper used by the calendar grid to snap drag targets */
+.no-select {
+  user-select: none;
+}
+
+/* Shared form-field styling used across AddActivityModal, Settings, etc. */
+@layer components {
+  .input {
+    @apply w-full rounded-lg border border-navy/15 bg-white/80 px-3 py-2 text-sm text-navy
+      focus:outline-none focus:ring-2 focus:ring-current/40 focus:border-current transition-shadow;
+  }
+}

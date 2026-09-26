@@ -1,0 +1,116 @@
+/**
+ * dateUtils.js
+ * ------------
+ * Small, dependency-free date helpers shared across the app (calendar
+ * grids, dashboard week selector, workload calculations, insights).
+ * Dates are always represented as "YYYY-MM-DD" strings once they leave
+ * this file, and times as "HH:MM" 24-hour strings, so the rest of the
+ * codebase never has to juggle raw Date objects or timezones.
+ */
+
+export const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+export const DAY_SHORT = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+export const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+/** Formats a Date as a "YYYY-MM-DD" key, using LOCAL time (not UTC). */
+export function toDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/** Parses a "YYYY-MM-DD" key back into a local Date at midnight. */
+export function fromDateKey(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+export function addDays(date, amount) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + amount);
+  return d;
+}
+
+/** Returns the Monday that starts the week containing `date`. */
+export function startOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 = Sunday ... 6 = Saturday
+  const diff = day === 0 ? -6 : 1 - day; // shift so Monday is day 0 of the week
+  return addDays(d, diff);
+}
+
+/** Returns an array of 7 Dates, Monday through Sunday, for the week containing `date`. */
+export function getWeekDays(date) {
+  const monday = startOfWeek(date);
+  return Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+}
+
+export function isSameDay(a, b) {
+  return toDateKey(a) === toDateKey(b);
+}
+
+export function isToday(date) {
+  return isSameDay(date, new Date());
+}
+
+/** "24 Jun — 30 Jun 2026" style range label used in the calendar header. */
+export function formatWeekRange(weekDays) {
+  const start = weekDays[0];
+  const end = weekDays[6];
+  const startLabel = `${start.getDate()} ${MONTH_NAMES[start.getMonth()].slice(0, 3)}`;
+  const endLabel = `${end.getDate()} ${MONTH_NAMES[end.getMonth()].slice(0, 3)}`;
+  return `${startLabel} — ${endLabel} ${end.getFullYear()}`;
+}
+
+/** "September 21 — September 27" style label used on the dashboard. */
+export function formatWeekRangeLong(weekDays) {
+  const start = weekDays[0];
+  const end = weekDays[6];
+  return `${MONTH_NAMES[start.getMonth()]} ${start.getDate()} — ${MONTH_NAMES[end.getMonth()]} ${end.getDate()}`;
+}
+
+/** Converts "14:30" -> 14.5 (decimal hours), used for grid positioning & math. */
+export function timeToDecimal(time) {
+  const [h, m] = time.split(':').map(Number);
+  return h + m / 60;
+}
+
+/** Converts a decimal hour (14.5) back into "14:30". */
+export function decimalToTime(decimal) {
+  const h = Math.floor(decimal);
+  const m = Math.round((decimal - h) * 60);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+/** Formats "14:30" as "2:30 PM" for display. */
+export function formatTime12(time) {
+  const [h, m] = time.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return m === 0 ? `${hour12} ${period}` : `${hour12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+/** End time string given a start time and a duration in hours. */
+export function addHours(time, hours) {
+  return decimalToTime(timeToDecimal(time) + hours);
+}
+
+/** Days between two "YYYY-MM-DD" keys (b - a), used for deadline urgency. */
+export function daysBetween(aKey, bKey) {
+  const a = fromDateKey(aKey);
+  const b = fromDateKey(bKey);
+  return Math.round((b - a) / (1000 * 60 * 60 * 24));
+}
+
+/** Human label like "Deadline tomorrow" / "Deadline in 3 days" / "Deadline passed". */
+export function deadlineLabel(deadlineKey, todayKey = toDateKey(new Date())) {
+  const diff = daysBetween(todayKey, deadlineKey);
+  if (diff < 0) return 'Deadline passed';
+  if (diff === 0) return 'Deadline today';
+  if (diff === 1) return 'Deadline tomorrow';
+  return `Deadline in ${diff} days`;
+}
