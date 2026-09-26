@@ -30,9 +30,34 @@ function formatHourLabel(hour) {
   return `${h12} ${period}`;
 }
 
+/**
+ * Shared snapping math: turns a raw mouse/touch Y position (relative to the
+ * top of a day column) into a decimal hour clamped to the grid and snapped
+ * to the nearest 30 minutes. Both the live drag-preview (onDragOver, below)
+ * and the actual drop handler use this, so the ghost box you see while
+ * dragging always matches exactly where the activity will actually land.
+ */
+function snapToSlot(clientY, columnTop) {
+  const rawHour = GRID_START_HOUR + (clientY - columnTop) / HOUR_HEIGHT;
+  const snapped = Math.round(rawHour * 2) / 2;
+  return Math.min(Math.max(snapped, GRID_START_HOUR), GRID_END_HOUR - 0.5);
+}
+
+function decimalHourToTimeString(decimal) {
+  const h = Math.floor(decimal);
+  const m = Math.round((decimal - h) * 60);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
 export default function CalendarGrid({ days, activities, onSlotClick, onEventClick, onMoveActivity }) {
   const [now, setNow] = useState(new Date());
   const scrollRef = useRef(null);
+
+  // What's currently being dragged (if anything) and where it would land if
+  // dropped right now. `dragPreview` drives the dashed ghost box rendered
+  // inside the hovered day column further down.
+  const [draggingDuration, setDraggingDuration] = useState(null);
+  const [dragPreview, setDragPreview] = useState(null); // { dateKey, top } | null
 
   // Keep the current-time indicator live (section 18).
   useEffect(() => {
@@ -53,13 +78,10 @@ export default function CalendarGrid({ days, activities, onSlotClick, onEventCli
     const activityId = e.dataTransfer.getData('text/activity-id');
     if (!activityId) return;
     const container = e.currentTarget.getBoundingClientRect();
-    const offsetY = e.clientY - container.top;
-    const rawHour = GRID_START_HOUR + offsetY / HOUR_HEIGHT;
-    const snapped = Math.round(rawHour * 2) / 2; // snap to 30 min
-    const clamped = Math.min(Math.max(snapped, GRID_START_HOUR), GRID_END_HOUR - 0.5);
-    const h = Math.floor(clamped);
-    const m = Math.round((clamped - h) * 60);
-    onMoveActivity(activityId, dateKey, `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    const snappedHour = snapToSlot(e.clientY, container.top);
+    onMoveActivity(activityId, dateKey, decimalHourToTimeString(snappedHour));
+    setDragPreview(null);
+    setDraggingDuration(null);
   }
 
   const gridHeight = (GRID_END_HOUR - GRID_START_HOUR) * HOUR_HEIGHT;
@@ -123,7 +145,13 @@ export default function CalendarGrid({ days, activities, onSlotClick, onEventCli
             return (
               <div
                 key={dateKey}
-                onDragOver={(e) => e.preventDefault()}
+                onDragOver={(e) => {
+                  e.preventDefault(); // required for onDrop to fire at all — see MDN's HTML5 DnD docs
+                  const columnTop = e.currentTarget.getBoundingClientRect().top;
+                  const snappedHour = snapToSlot(e.clientY, columnTop);
+                  setDragPreview({ dateKey, top: (snappedHour - GRID_START_HOUR) * HOUR_HEIGHT });
+                }}
+                onDragLeave={() => setDragPreview((prev) => (prev?.dateKey === dateKey ? null : prev))}
                 onDrop={(e) => handleDrop(e, dateKey)}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
@@ -147,6 +175,16 @@ export default function CalendarGrid({ days, activities, onSlotClick, onEventCli
                   />
                 ))}
 
+                {/* Drag-preview ghost: shows exactly where the dragged activity
+                    will land, snapped the same way the drop handler snaps,
+                    so there's no guessing/mis-drop from an accidental swipe. */}
+                {dragPreview?.dateKey === dateKey && draggingDuration && (
+                  <div
+                    className="absolute left-0 right-0 mx-0.5 rounded-md border-2 border-dashed border-current bg-current/10 pointer-events-none z-10"
+                    style={{ top: dragPreview.top, height: draggingDuration * HOUR_HEIGHT }}
+                  />
+                )}
+
                 {/* Current-time indicator (section 18) */}
                 {today && nowDecimal >= GRID_START_HOUR && nowDecimal <= GRID_END_HOUR && (
                   <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: nowTop }}>
@@ -166,7 +204,14 @@ export default function CalendarGrid({ days, activities, onSlotClick, onEventCli
                     columnCount={activity.columnCount}
                     deadlineSoon={activity.deadline && activity.deadline <= soonKey && !activity.completed}
                     onClick={onEventClick}
-                    onDragStart={(e, a) => e.dataTransfer.setData('text/activity-id', a.id)}
+                    onDragStart={(e, a) => {
+                      e.dataTransfer.setData('text/activity-id', a.id);
+                      setDraggingDuration(a.duration); // so the ghost box below is sized to match
+                    }}
+                    onDragEnd={() => {
+                      setDragPreview(null);
+                      setDraggingDuration(null);
+                    }}
                   />
                 ))}
               </div>

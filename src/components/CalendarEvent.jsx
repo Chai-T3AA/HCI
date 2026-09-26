@@ -17,7 +17,7 @@ const PRIORITY_STYLE = {
   low: 'bg-haze/80 text-cream border-haze',
 };
 
-export default function CalendarEvent({ activity, top, height, column, columnCount, onClick, onDragStart, deadlineSoon }) {
+export default function CalendarEvent({ activity, top, height, column, columnCount, onClick, onDragStart, onDragEnd, deadlineSoon }) {
   const widthPct = 100 / columnCount;
   const leftPct = widthPct * column;
   const isSmall = height < 40;
@@ -26,6 +26,7 @@ export default function CalendarEvent({ activity, top, height, column, columnCou
     <button
       draggable
       onDragStart={(e) => onDragStart(e, activity)}
+      onDragEnd={onDragEnd} // fires even if the drop lands outside a valid column — used to clear the drag-preview ghost
       onClick={(e) => {
         e.stopPropagation();
         onClick(activity);
