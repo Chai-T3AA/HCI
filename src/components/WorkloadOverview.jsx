@@ -27,8 +27,8 @@ import { WORKLOAD_LABEL } from '../utils/workloadUtils';
 // the user's own limit — so the bar color always matches the calendar cell
 // color for that same day.
 const LEVEL_BAR_CLASS = {
-  light: 'bg-haze/50',
-  moderate: 'bg-current',
+  light: 'bg-secondary/50',
+  moderate: 'bg-primary',
   heavy: 'bg-amber-500',
 };
 
@@ -49,12 +49,12 @@ export default function WorkloadOverview({ weekWorkload }) {
   const chartHeightClass = expanded ? 'h-64' : 'h-40';
 
   return (
-    <div className="bg-white/70 border border-navy/10 rounded-xl2 p-5 shadow-soft">
+    <div className="bg-surface/70 border border-border rounded-xl2 p-5 shadow-soft">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-serif text-lg text-navy">Workload Overview</h3>
+        <h3 className="font-serif text-lg text-textPrimary">Workload Overview</h3>
         <button
           onClick={() => setExpanded((v) => !v)}
-          className="text-navy/50 hover:text-navy p-1 rounded-md hover:bg-navy/5"
+          className="text-textSecondary/75 hover:text-textPrimary p-1 rounded-md hover:bg-textPrimary/5"
           aria-label={expanded ? 'Shrink chart' : 'Expand chart'}
           title={expanded ? 'Shrink chart' : 'Expand chart'}
         >
@@ -86,22 +86,22 @@ export default function WorkloadOverview({ weekWorkload }) {
                   <div
                     role="tooltip"
                     className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap
-                      rounded-lg bg-navy text-cream text-[10px] px-2.5 py-1.5 shadow-soft
+                      rounded-lg bg-sidebar text-onSidebar text-[10px] px-2.5 py-1.5 shadow-soft
                       opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100
                       transition-all duration-150 pointer-events-none z-20"
                   >
                     <p className="font-semibold mb-0.5">
                       {day.hours}h total · {day.overloaded ? 'Over limit' : WORKLOAD_LABEL[day.level]}
                     </p>
-                    <p className="text-cream/80">
+                    <p className="text-onSidebar/80">
                       High {breakdown.high}h · Med {breakdown.medium}h · Low {breakdown.low}h
                     </p>
                     {/* little triangle pointer so the tooltip visually connects to its bar */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy" />
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-sidebar" />
                   </div>
                 </div>
               </div>
-              <span className="text-[10px] font-semibold text-navy/60">{DAY_SHORT[day.date.getDay()]}</span>
+              <span className="text-[10px] font-semibold text-textSecondary/90">{DAY_SHORT[day.date.getDay()]}</span>
               {/* Status folded into one compact line instead of a separate
                   badge row underneath: color + icon (when flagged) + hours,
                   all in a single element. The full "Over limit"/"Heavy"
@@ -114,7 +114,7 @@ export default function WorkloadOverview({ weekWorkload }) {
                     ? 'text-danger font-semibold'
                     : day.level === 'heavy'
                     ? 'text-amber-600 font-semibold'
-                    : 'text-navy/40'
+                    : 'text-textSecondary/60'
                 }`}
               >
                 {(day.overloaded || day.level === 'heavy') && <AlertTriangle size={9} />}

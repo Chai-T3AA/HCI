@@ -31,22 +31,22 @@ export default function App() {
     <SettingsProvider>
     <ActivityProvider>
       <HashRouter>
-        <div className="flex min-h-screen bg-cream">
+        <div className="flex min-h-screen bg-background">
           <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
           <div className="flex-1 min-w-0 flex flex-col">
             {/* Mobile-only top bar: hidden entirely at md+ since the static
                 sidebar is always visible there and this bar would be redundant. */}
-            <header className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-navy/10 bg-cream sticky top-0 z-20">
+            <header className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-background sticky top-0 z-20">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="p-2 -ml-2 rounded-lg text-navy hover:bg-navy/5"
+                className="p-2 -ml-2 rounded-lg text-textPrimary hover:bg-textPrimary/5"
                 aria-label="Open menu"
               >
                 <Menu size={20} />
               </button>
-              <Clock3 size={18} className="text-amber" />
-              <span className="font-serif text-lg text-navy">TimeWise</span>
+              <Clock3 size={18} className="text-accent" />
+              <span className="font-serif text-lg text-textPrimary">TimeWise</span>
             </header>
 
             <main className="flex-1 p-4 md:p-8 overflow-x-hidden">

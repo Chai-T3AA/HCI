@@ -1,10 +1,16 @@
 /**
  * TAILWIND CONFIG
  * ----------------
- * Wires the TimeWise brand palette and typography into Tailwind so every
- * component can use semantic class names (bg-navy, text-cream, font-serif)
- * instead of hard-coded hex values. Keeping the palette here means the
- * whole app's look can be re-themed by editing this one file.
+ * TimeWise's color system, "Soft Winter/Cream" (light) and "Deep Cocoa/Ice
+ * Blue" (dark) — see the design brief this was built from. Every themeable
+ * color is a CSS variable defined in index.css (`:root` for light, `.dark`
+ * for dark) and referenced here via `rgb(var(--x) / <alpha-value>)`, so:
+ *   1. Switching a color for BOTH modes at once means editing exactly one
+ *      place (index.css), not hunting through ~20 component files.
+ *   2. Every token still supports Tailwind's opacity modifiers, e.g.
+ *      `bg-primary/50`, exactly like a plain hex color would.
+ * A few tokens are deliberately fixed (not variables) because they're
+ * meant to look the same in both themes — see the comments below.
  */
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -16,42 +22,41 @@ export default {
   theme: {
     extend: {
       colors: {
-        // The five TimeWise brand colors (see PRD section 4 / color rules).
-        navy: {
-          DEFAULT: '#102A6B', // Silent Navy - headings, primary buttons, sidebar, high priority
-          50: '#EEF1F8',
-          100: '#D6DCEE',
-          600: '#16327E',
-          700: '#0C1F52',
+        // --- Theme-reactive tokens (values swap via CSS var, see index.css) ---
+        background: 'rgb(var(--color-background) / <alpha-value>)', // main page background
+        surface: 'rgb(var(--color-surface) / <alpha-value>)', // cards, secondary surfaces
+        surfaceElevated: 'rgb(var(--color-surface-elevated) / <alpha-value>)', // modals, popovers, elevated cards
+        primary: {
+          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)', // primary interactive elements / selected states
+          hover: 'rgb(var(--color-primary-hover) / <alpha-value>)',
         },
-        amber: {
-          DEFAULT: '#CEA273', // Sandy Amber - accents, "Best Match", selected states
-          50: '#FBF3EA',
-          100: '#F3E2CD',
-        },
-        current: {
-          DEFAULT: '#015185', // Blue Current - secondary buttons, links, medium priority
-          50: '#E6F0F6',
-        },
-        haze: {
-          DEFAULT: '#5990C0', // Blue Haze - soft UI, progress, low priority
-          50: '#EEF4FA',
-        },
-        cream: {
-          DEFAULT: '#FCEDD3', // Light Cream - page/card/modal backgrounds
-          50: '#FFFBF4',
-        },
-        // Muted brick-red "alert" color — used ONLY for the workload-exceeded
-        // feature (a day going over the user's Settings > Max Workload limit).
-        // Deliberately not a neon/pure red so it stays in the same warm,
-        // editorial register as the rest of the palette instead of looking
-        // like a generic SaaS error state.
+        secondary: 'rgb(var(--color-secondary) / <alpha-value>)', // secondary interactive elements / highlights
+        accent: 'rgb(var(--color-accent) / <alpha-value>)', // subtle warm accents, "Best Match", selected chips
+        textPrimary: 'rgb(var(--color-text-primary) / <alpha-value>)', // headings, important text
+        textSecondary: 'rgb(var(--color-text-secondary) / <alpha-value>)', // secondary/muted text
+        border: 'rgb(var(--color-border) / <alpha-value>)',
+
+        // --- Fixed tokens (identical in both themes) ---
+        // The sidebar is a brand anchor, not a "page surface" — it stays the
+        // same deep chocolate-brown regardless of light/dark, matching how
+        // the app already behaved before this theme (sidebar never flipped).
+        sidebar: '#4B3325',
+        onSidebar: '#F0F2EE', // text/icons sitting on the sidebar
+        // Small color chips (priority badges, "Best Match" pill) carry their
+        // own background and need one text color that reads on all of them;
+        // rather than swap it per-theme, it's fixed dark ink, chosen because
+        // every chip color in this palette is light/mid-toned enough for it.
+        onAccent: '#4B3325',
+        // Semantic status colors — kept distinct from the brand blues/browns
+        // per the brief ("harmonize, don't replace semantic meaning"), but
+        // muted to match the palette's soft, non-neon register.
         danger: {
           DEFAULT: '#B3423A',
           50: '#F8E7E4',
           100: '#F0CDC7',
           700: '#8A322C',
         },
+        warning: '#B08246', // muted ochre — "heavy" workload, distinct from "overloaded" (danger)
       },
       fontFamily: {
         // Serif for editorial headings, sans for everyday UI text.
@@ -59,7 +64,7 @@ export default {
         sans: ['"Inter"', 'sans-serif'],
       },
       boxShadow: {
-        soft: '0 4px 20px -4px rgba(16, 42, 107, 0.12)',
+        soft: '0 4px 20px -4px rgba(75, 51, 37, 0.14)',
       },
       borderRadius: {
         xl2: '1.25rem',

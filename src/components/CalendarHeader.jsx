@@ -27,30 +27,30 @@ export default function CalendarHeader({
   onAdd,
 }) {
   return (
-    <div className="border-b border-navy/10 pb-4 mb-4">
+    <div className="border-b border-border pb-4 mb-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <button onClick={onPrev} className="p-2 rounded-lg hover:bg-navy/5 text-navy" aria-label="Previous">
+          <button onClick={onPrev} className="p-2 rounded-lg hover:bg-textPrimary/5 text-textPrimary" aria-label="Previous">
             <ChevronLeft size={18} />
           </button>
-          <button onClick={onNext} className="p-2 rounded-lg hover:bg-navy/5 text-navy" aria-label="Next">
+          <button onClick={onNext} className="p-2 rounded-lg hover:bg-textPrimary/5 text-textPrimary" aria-label="Next">
             <ChevronRight size={18} />
           </button>
-          <h2 className="font-serif text-xl text-navy ml-1">
+          <h2 className="font-serif text-xl text-textPrimary ml-1">
             {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h2>
-          <button onClick={onToday} className="ml-2 text-xs font-semibold px-3 py-1.5 rounded-lg border border-navy/20 text-navy hover:bg-navy/5">
+          <button onClick={onToday} className="ml-2 text-xs font-semibold px-3 py-1.5 rounded-lg border border-border text-textPrimary hover:bg-textPrimary/5">
             Today
           </button>
         </div>
 
-        <div className="flex items-center gap-1 bg-navy/5 rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-textPrimary/5 rounded-lg p-1">
           {VIEWS.map((v) => (
             <button
               key={v}
               onClick={() => onView(v)}
               className={`text-xs font-semibold px-3 py-1.5 rounded-md capitalize transition-colors ${
-                view === v ? 'bg-navy text-cream' : 'text-navy/60 hover:text-navy'
+                view === v ? 'bg-primary text-onAccent' : 'text-textSecondary/90 hover:text-textPrimary'
               }`}
             >
               {v}
@@ -60,31 +60,31 @@ export default function CalendarHeader({
 
         <button
           onClick={onAdd}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-navy text-cream hover:bg-navy-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-onAccent hover:bg-primary-600 transition-colors"
         >
           <Plus size={16} /> New Activity
         </button>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 mt-3">
-        <p className="text-sm text-navy/60">{rangeLabel}</p>
+        <p className="text-sm text-textSecondary/90">{rangeLabel}</p>
 
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-navy/40" />
+            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-textSecondary/60" />
             <input
               value={search}
               onChange={(e) => onSearch(e.target.value)}
               placeholder="Search activities..."
-              className="pl-8 pr-3 py-1.5 text-sm rounded-lg border border-navy/15 bg-white/70 focus:outline-none focus:ring-2 focus:ring-current/30 w-48"
+              className="pl-8 pr-3 py-1.5 text-sm rounded-lg border border-border bg-surface/70 focus:outline-none focus:ring-2 focus:ring-primary/30 w-48"
             />
           </div>
           <div className="relative">
-            <SlidersHorizontal size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-navy/40 pointer-events-none" />
+            <SlidersHorizontal size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-textSecondary/60 pointer-events-none" />
             <select
               value={priorityFilter}
               onChange={(e) => onPriorityFilter(e.target.value)}
-              className="pl-8 pr-3 py-1.5 text-sm rounded-lg border border-navy/15 bg-white/70 focus:outline-none focus:ring-2 focus:ring-current/30 appearance-none"
+              className="pl-8 pr-3 py-1.5 text-sm rounded-lg border border-border bg-surface/70 focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none"
             >
               <option value="all">All priorities</option>
               <option value="high">High</option>

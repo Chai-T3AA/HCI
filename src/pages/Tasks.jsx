@@ -46,25 +46,25 @@ export default function Tasks() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-serif text-3xl text-navy">Tasks</h1>
+        <h1 className="font-serif text-3xl text-textPrimary">Tasks</h1>
         <button
           onClick={() => {
             setEditingActivity(null);
             setModalOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-navy text-cream hover:bg-navy-600"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-onAccent hover:bg-primary-600"
         >
           <Plus size={16} /> New Activity
         </button>
       </div>
 
-      <div className="flex items-center gap-1 bg-white/70 border border-navy/10 rounded-lg p-1 w-fit shadow-soft">
+      <div className="flex items-center gap-1 bg-surface/70 border border-border rounded-lg p-1 w-fit shadow-soft">
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`text-sm font-medium px-4 py-2 rounded-md transition-colors ${
-              tab === t ? 'bg-navy text-cream' : 'text-navy/60 hover:text-navy'
+              tab === t ? 'bg-primary text-onAccent' : 'text-textSecondary/90 hover:text-textPrimary'
             }`}
           >
             {t}
@@ -73,7 +73,7 @@ export default function Tasks() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-navy/50 italic py-12 text-center">No tasks in this category yet.</p>
+        <p className="text-sm text-textSecondary/75 italic py-12 text-center">No tasks in this category yet.</p>
       ) : (
         <div className="grid md:grid-cols-2 gap-3">
           {filtered.map((a) => (

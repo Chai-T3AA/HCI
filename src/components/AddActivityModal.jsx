@@ -117,12 +117,23 @@ export default function AddActivityModal({ open, onClose, activityToEdit, defaul
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy/40 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]">
-      <div className="bg-cream w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl2 shadow-soft border border-navy/10">
+    // Scrollable OUTER wrapper (not just the inner box) — see the long
+    // comment above `return` in ActivityDetails.jsx for why: on mobile,
+    // once the on-screen keyboard opens (the instant "Activity Name" is
+    // focused), a `fixed inset-0 flex items-center` box with no scroll of
+    // its own can get pushed partly off the now-shrunken visible area with
+    // no way to reach it — the inner `overflow-y-auto` only scrolls
+    // *within* the box, it can't move the box itself back into view. This
+    // was consistent with what looked like an unresponsive "Add Activity"
+    // button: it wasn't unresponsive, some phones just couldn't scroll
+    // down far enough to actually reach it once the keyboard was up.
+    <div className="fixed inset-0 z-50 overflow-y-auto p-4 bg-primary/40 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]">
+      <div className="min-h-full flex items-center justify-center py-4">
+      <div className="bg-background w-full max-w-3xl rounded-xl2 shadow-soft border border-border">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-navy/10 sticky top-0 bg-cream z-10">
-          <h2 className="font-serif text-xl text-navy">{isEditing ? 'Edit Activity' : 'Add Activity'}</h2>
-          <button onClick={onClose} className="text-navy/50 hover:text-navy" aria-label="Close">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-background z-10 rounded-t-xl2">
+          <h2 className="font-serif text-xl text-textPrimary">{isEditing ? 'Edit Activity' : 'Add Activity'}</h2>
+          <button onClick={onClose} className="text-textSecondary/75 hover:text-textPrimary" aria-label="Close">
             <X size={20} />
           </button>
         </div>
@@ -206,10 +217,10 @@ export default function AddActivityModal({ open, onClose, activityToEdit, defaul
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
-              <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-medium text-navy/70 hover:bg-navy/5">
+              <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-medium text-textSecondary hover:bg-textPrimary/5">
                 Cancel
               </button>
-              <button type="submit" className="px-5 py-2 rounded-lg text-sm font-semibold bg-navy text-cream hover:bg-navy-600 transition-colors">
+              <button type="submit" className="px-5 py-2 rounded-lg text-sm font-semibold bg-primary text-onAccent hover:bg-primary-hover transition-colors">
                 {isEditing ? 'Save Changes' : 'Add Activity'}
               </button>
             </div>
@@ -219,14 +230,15 @@ export default function AddActivityModal({ open, onClose, activityToEdit, defaul
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Sparkles size={16} className="text-amber-700" />
-              <h3 className="font-serif text-base text-navy">Smart Suggestion</h3>
+              <h3 className="font-serif text-base text-textPrimary">Smart Suggestion</h3>
             </div>
-            <p className="text-xs text-navy/50 mb-3">
+            <p className="text-xs text-textSecondary/75 mb-3">
               Based on duration, priority, deadline and your current schedule.
             </p>
             <SuggestedTimeSlots suggestions={suggestions} onApply={applySuggestion} selectedKey={selectedSuggestionKey} />
           </div>
         </form>
+      </div>
       </div>
     </div>
   );
@@ -235,7 +247,7 @@ export default function AddActivityModal({ open, onClose, activityToEdit, defaul
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="block text-xs font-medium text-navy/60 mb-1">{label}</span>
+      <span className="block text-xs font-medium text-textSecondary/90 mb-1">{label}</span>
       {children}
     </label>
   );

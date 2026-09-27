@@ -9,7 +9,7 @@
  */
 import { addDays, startOfWeek, toDateKey, isToday, getOrderedDayLabels } from '../utils/dateUtils';
 
-const PRIORITY_DOT = { high: 'bg-navy', medium: 'bg-current', low: 'bg-haze' };
+const PRIORITY_DOT = { high: 'bg-primary', medium: 'bg-primary', low: 'bg-secondary' };
 
 export default function MonthView({ monthDate, activities, weekStartsOn = 1, onSelectDay, onEventClick }) {
   const year = monthDate.getFullYear();
@@ -21,9 +21,9 @@ export default function MonthView({ monthDate, activities, weekStartsOn = 1, onS
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      <div className="grid grid-cols-7 border-b border-navy/10 pb-2 mb-1">
+      <div className="grid grid-cols-7 border-b border-border pb-2 mb-1">
         {headerLabels.map((d) => (
-          <div key={d} className="text-center text-[11px] font-semibold text-navy/50 tracking-wider">
+          <div key={d} className="text-center text-[11px] font-semibold text-textSecondary/75 tracking-wider">
             {d}
           </div>
         ))}
@@ -40,12 +40,12 @@ export default function MonthView({ monthDate, activities, weekStartsOn = 1, onS
               key={dateKey}
               onClick={() => onSelectDay(day)}
               className={`text-left border rounded-lg p-1.5 flex flex-col min-h-[92px] transition-colors ${
-                inMonth ? 'bg-white/60 border-navy/10' : 'bg-navy/[0.02] border-navy/5'
-              } ${today ? 'ring-2 ring-amber' : 'hover:border-current/40'}`}
+                inMonth ? 'bg-surface/60 border-border' : 'bg-textPrimary/[0.03] border-border/60'
+              } ${today ? 'ring-2 ring-accent' : 'hover:border-primary/40'}`}
             >
               <span
                 className={`text-xs font-semibold mb-1 ${
-                  !inMonth ? 'text-navy/30' : today ? 'text-amber-700' : 'text-navy/70'
+                  !inMonth ? 'text-textSecondary/45' : today ? 'text-amber-700' : 'text-textSecondary'
                 }`}
               >
                 {day.getDate()}
@@ -59,7 +59,7 @@ export default function MonthView({ monthDate, activities, weekStartsOn = 1, onS
                       e.stopPropagation();
                       onEventClick(a);
                     }}
-                    className={`text-[9px] truncate rounded px-1 py-0.5 text-cream ${PRIORITY_DOT[a.priority]} ${
+                    className={`text-[9px] truncate rounded px-1 py-0.5 text-onAccent ${PRIORITY_DOT[a.priority]} ${
                       a.completed ? 'opacity-50 line-through' : ''
                     }`}
                   >
@@ -67,7 +67,7 @@ export default function MonthView({ monthDate, activities, weekStartsOn = 1, onS
                   </div>
                 ))}
                 {dayActivities.length > 3 && (
-                  <p className="text-[9px] text-navy/40 px-1">+{dayActivities.length - 3} more</p>
+                  <p className="text-[9px] text-textSecondary/60 px-1">+{dayActivities.length - 3} more</p>
                 )}
               </div>
             </button>

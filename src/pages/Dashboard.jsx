@@ -46,21 +46,21 @@ export default function Dashboard() {
       {/* Header + week selector */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl text-navy">Good morning, {settings.name}</h1>
-          <p className="text-navy/60 mt-1">Here's what your week looks like.</p>
+          <h1 className="font-serif text-3xl text-textPrimary">Good morning, {settings.name}</h1>
+          <p className="text-textSecondary/90 mt-1">Here's what your week looks like.</p>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto bg-white/70 border border-navy/10 rounded-lg px-3 py-2 shadow-soft">
-          <button onClick={() => setWeekAnchor((d) => addDays(d, -7))} className="text-navy/50 hover:text-navy">
+        <div className="flex items-center gap-2 bg-surface/70 border border-border rounded-lg px-3 py-2 shadow-soft">
+          <button onClick={() => setWeekAnchor((d) => addDays(d, -7))} className="text-textSecondary/75 hover:text-textPrimary">
             <ChevronLeft size={16} />
           </button>
-          <span className="text-sm font-medium text-navy px-1 whitespace-nowrap">{formatWeekRangeLong(weekDays)}</span>
-          <button onClick={() => setWeekAnchor((d) => addDays(d, 7))} className="text-navy/50 hover:text-navy">
+          <span className="text-sm font-medium text-textPrimary px-1 whitespace-nowrap">{formatWeekRangeLong(weekDays)}</span>
+          <button onClick={() => setWeekAnchor((d) => addDays(d, 7))} className="text-textSecondary/75 hover:text-textPrimary">
             <ChevronRight size={16} />
           </button>
           <button
             onClick={() => setWeekAnchor(new Date())}
-            className="ml-2 text-xs font-semibold px-2.5 py-1 rounded-md border border-navy/20 hover:bg-navy/5"
+            className="ml-2 text-xs font-semibold px-2.5 py-1 rounded-md border border-border hover:bg-textPrimary/5"
           >
             Today
           </button>
@@ -69,10 +69,10 @@ export default function Dashboard() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <DashboardCard label="Total Tasks" value={stats.totalTasks} icon={ListChecks} accent="navy" />
-        <DashboardCard label="Hours Planned" value={stats.hoursPlanned} suffix="h" icon={Clock4} accent="current" />
-        <DashboardCard label="Upcoming Deadlines" value={stats.upcomingDeadlines} icon={AlertCircle} accent="amber" />
-        <DashboardCard label="Weekly Completion" value={stats.completion} suffix="%" icon={TrendingUp} accent="haze" />
+        <DashboardCard label="Total Tasks" value={stats.totalTasks} icon={ListChecks} accent="textPrimary" />
+        <DashboardCard label="Hours Planned" value={stats.hoursPlanned} suffix="h" icon={Clock4} accent="primary" />
+        <DashboardCard label="Upcoming Deadlines" value={stats.upcomingDeadlines} icon={AlertCircle} accent="accent" />
+        <DashboardCard label="Weekly Completion" value={stats.completion} suffix="%" icon={TrendingUp} accent="secondary" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -87,22 +87,22 @@ export default function Dashboard() {
         </div>
 
         {/* Weekly planner preview */}
-        <div className="lg:col-span-2 bg-white/70 border border-navy/10 rounded-xl2 p-5 shadow-soft">
+        <div className="lg:col-span-2 bg-surface/70 border border-border rounded-xl2 p-5 shadow-soft">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-serif text-lg text-navy">This Week's Activities</h3>
+            <h3 className="font-serif text-lg text-textPrimary">This Week's Activities</h3>
             <button
               onClick={() => {
                 setEditingActivity(null);
                 setModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-navy text-cream hover:bg-navy-600"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-primary text-onAccent hover:bg-primary-600"
             >
               <Plus size={14} /> Add Activity
             </button>
           </div>
 
           {weekActivities.length === 0 ? (
-            <p className="text-sm text-navy/50 italic py-8 text-center">No activities scheduled this week yet.</p>
+            <p className="text-sm text-textSecondary/75 italic py-8 text-center">No activities scheduled this week yet.</p>
           ) : (
             <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1">
               {weekDays.map((day) => {
@@ -111,7 +111,7 @@ export default function Dashboard() {
                 if (dayActivities.length === 0) return null;
                 return (
                   <div key={dateKey}>
-                    <p className="text-xs font-semibold text-navy/50 uppercase tracking-wider mb-2">
+                    <p className="text-xs font-semibold text-textSecondary/75 uppercase tracking-wider mb-2">
                       {DAY_NAMES[day.getDay()]} · {day.getDate()}
                     </p>
                     <div className="space-y-2">

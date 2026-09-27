@@ -44,13 +44,13 @@ export default function Sidebar({ open = false, onClose }) {
       {open && (
         <div
           onClick={onClose}
-          className="fixed inset-0 z-30 bg-navy/50 md:hidden"
+          className="fixed inset-0 z-30 bg-sidebar/50 md:hidden"
           aria-hidden="true"
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 shrink-0 bg-navy text-cream flex flex-col
+        className={`fixed inset-y-0 left-0 z-40 w-64 shrink-0 bg-sidebar text-onSidebar flex flex-col
           transform transition-all duration-200 ease-out
           md:sticky md:top-0 md:h-screen md:translate-x-0
           ${open ? 'translate-x-0' : '-translate-x-full'}
@@ -60,15 +60,15 @@ export default function Sidebar({ open = false, onClose }) {
         <button
           onClick={() => setCollapsed((v) => !v)}
           className="hidden md:flex absolute -right-3 top-8 h-6 w-6 items-center justify-center
-            rounded-full bg-navy border border-cream/20 text-cream/70 hover:text-cream"
+            rounded-full bg-sidebar border border-onSidebar/20 text-onSidebar/70 hover:text-onSidebar"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
 
         {/* Logo / wordmark */}
-        <div className={`px-6 py-7 flex items-center gap-2 border-b border-cream/10 ${collapsed ? 'md:justify-center' : ''}`}>
-          <Clock3 size={22} className="text-amber shrink-0" />
+        <div className={`px-6 py-7 flex items-center gap-2 border-b border-onSidebar/10 ${collapsed ? 'md:justify-center' : ''}`}>
+          <Clock3 size={22} className="text-accent shrink-0" />
           {!collapsed && <span className="font-serif text-xl tracking-wide">TimeWise</span>}
         </div>
 
@@ -86,8 +86,8 @@ export default function Sidebar({ open = false, onClose }) {
                   collapsed ? 'md:justify-center md:px-0' : ''
                 } ${
                   isActive
-                    ? 'bg-amber/20 text-amber border border-amber/40'
-                    : 'text-cream/80 hover:bg-cream/10 hover:text-cream'
+                    ? 'bg-accent/20 text-accent border border-accent/40'
+                    : 'text-onSidebar/80 hover:bg-onSidebar/10 hover:text-onSidebar'
                 }`
               }
             >
@@ -99,27 +99,27 @@ export default function Sidebar({ open = false, onClose }) {
 
         {/* Weekly progress snapshot */}
         {!collapsed && (
-          <div className="mx-4 mb-4 rounded-xl border border-cream/10 bg-cream/5 p-4">
-            <p className="text-xs uppercase tracking-wider text-cream/60 mb-2">Weekly Progress</p>
+          <div className="mx-4 mb-4 rounded-xl border border-onSidebar/10 bg-onSidebar/5 p-4">
+            <p className="text-xs uppercase tracking-wider text-onSidebar/60 mb-2">Weekly Progress</p>
             <div className="flex items-end justify-between">
-              <span className="font-serif text-2xl text-amber">{stats.completion}%</span>
-              <span className="text-xs text-cream/60">{stats.hoursCompleted}h / {stats.hoursPlanned}h</span>
+              <span className="font-serif text-2xl text-accent">{stats.completion}%</span>
+              <span className="text-xs text-onSidebar/60">{stats.hoursCompleted}h / {stats.hoursPlanned}h</span>
             </div>
-            <div className="mt-2 h-1.5 w-full rounded-full bg-cream/10 overflow-hidden">
-              <div className="h-full bg-amber rounded-full transition-all" style={{ width: `${stats.completion}%` }} />
+            <div className="mt-2 h-1.5 w-full rounded-full bg-onSidebar/10 overflow-hidden">
+              <div className="h-full bg-accent rounded-full transition-all" style={{ width: `${stats.completion}%` }} />
             </div>
           </div>
         )}
 
         {/* User profile footer */}
-        <div className={`px-4 py-4 border-t border-cream/10 flex items-center gap-3 ${collapsed ? 'md:justify-center' : ''}`}>
-          <div className="h-9 w-9 rounded-full bg-amber/20 border border-amber/40 flex items-center justify-center shrink-0">
-            <User size={16} className="text-amber" />
+        <div className={`px-4 py-4 border-t border-onSidebar/10 flex items-center gap-3 ${collapsed ? 'md:justify-center' : ''}`}>
+          <div className="h-9 w-9 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center shrink-0">
+            <User size={16} className="text-accent" />
           </div>
           {!collapsed && (
             <div className="min-w-0">
               <p className="text-sm font-medium truncate">{settings.name}</p>
-              <p className="text-xs text-cream/50 truncate">student@campus.edu</p>
+              <p className="text-xs text-onSidebar/50 truncate">student@campus.edu</p>
             </div>
           )}
         </div>

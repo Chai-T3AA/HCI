@@ -9,7 +9,7 @@
  */
 import PriorityBadge from './PriorityBadge';
 
-const BAR_CLASS = { high: 'bg-navy', medium: 'bg-current', low: 'bg-haze' };
+const BAR_CLASS = { high: 'bg-sidebar', medium: 'bg-primary', low: 'bg-secondary' };
 
 export default function PriorityBreakdown({ activities }) {
   const totals = activities.reduce(
@@ -22,11 +22,11 @@ export default function PriorityBreakdown({ activities }) {
   const totalHours = totals.high + totals.medium + totals.low;
 
   return (
-    <div className="bg-white/70 border border-navy/10 rounded-xl2 p-5 shadow-soft flex-1">
-      <h3 className="font-serif text-lg text-navy mb-4">Priority Breakdown</h3>
+    <div className="bg-surface/70 border border-border rounded-xl2 p-5 shadow-soft flex-1">
+      <h3 className="font-serif text-lg text-textPrimary mb-4">Priority Breakdown</h3>
 
       {totalHours === 0 ? (
-        <p className="text-sm text-navy/50 italic">Nothing scheduled this week yet.</p>
+        <p className="text-sm text-textSecondary/75 italic">Nothing scheduled this week yet.</p>
       ) : (
         <div className="space-y-3">
           {['high', 'medium', 'low'].map((priority) => {
@@ -36,9 +36,9 @@ export default function PriorityBreakdown({ activities }) {
               <div key={priority}>
                 <div className="flex items-center justify-between mb-1">
                   <PriorityBadge priority={priority} />
-                  <span className="text-xs text-navy/60">{hours}h · {pct}%</span>
+                  <span className="text-xs text-textSecondary/90">{hours}h · {pct}%</span>
                 </div>
-                <div className="h-2 w-full rounded-full bg-navy/5 overflow-hidden">
+                <div className="h-2 w-full rounded-full bg-textPrimary/5 overflow-hidden">
                   <div className={`h-full rounded-full ${BAR_CLASS[priority]} transition-all`} style={{ width: `${pct}%` }} />
                 </div>
               </div>

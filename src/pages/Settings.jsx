@@ -29,8 +29,8 @@ export default function Settings() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <h1 className="font-serif text-3xl text-navy">Settings</h1>
-        {justSaved && <span className="text-xs text-current font-medium">Saved</span>}
+        <h1 className="font-serif text-3xl text-textPrimary">Settings</h1>
+        {justSaved && <span className="text-xs text-primary font-medium">Saved</span>}
       </div>
 
       <Section title="Profile">
@@ -44,7 +44,7 @@ export default function Settings() {
           label="Dark mode"
           checked={settings.darkMode}
           onChange={(v) => handleChange('darkMode', v)}
-          hint="Swaps the cream page background and navy text for a dark theme. Accent colors (navy, amber, blue) stay the same."
+          hint="Swaps the light Soft Winter theme for the Deep Cocoa/Ice Blue dark theme."
         />
       </Section>
 
@@ -171,7 +171,7 @@ function MaxWorkloadField({ value, onChange }) {
       {error ? (
         <p className="text-xs text-danger mt-1">{error}</p>
       ) : (
-        <p className="text-xs text-navy/50 mt-1">
+        <p className="text-xs text-textSecondary/75 mt-1">
           Must be above 0 and below 24 hours. Days over this turn orange (heavy) or red (over limit) on the Calendar
           and the Workload Overview chart.
         </p>
@@ -182,8 +182,8 @@ function MaxWorkloadField({ value, onChange }) {
 
 function Section({ title, children }) {
   return (
-    <div className="bg-white/70 border border-navy/10 rounded-xl2 p-5 shadow-soft space-y-4">
-      <h3 className="font-serif text-lg text-navy">{title}</h3>
+    <div className="bg-surface/70 border border-border rounded-xl2 p-5 shadow-soft space-y-4">
+      <h3 className="font-serif text-lg text-textPrimary">{title}</h3>
       {children}
     </div>
   );
@@ -192,7 +192,7 @@ function Section({ title, children }) {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="block text-xs font-medium text-navy/60 mb-1">{label}</span>
+      <span className="block text-xs font-medium text-textSecondary/90 mb-1">{label}</span>
       {children}
     </label>
   );
@@ -202,14 +202,14 @@ function Toggle({ label, checked, onChange, disabled, hint }) {
   return (
     <label className={`flex items-center justify-between gap-4 py-1 ${disabled ? 'opacity-60' : ''}`}>
       <span>
-        <span className="text-sm text-navy">{label}</span>
-        {hint && <p className="text-xs text-navy/50">{hint}</p>}
+        <span className="text-sm text-textPrimary">{label}</span>
+        {hint && <p className="text-xs text-textSecondary/75">{hint}</p>}
       </span>
       <button
         type="button"
         disabled={disabled}
         onClick={() => onChange && onChange(!checked)}
-        className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${checked ? 'bg-navy' : 'bg-navy/20'}`}
+        className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${checked ? 'bg-primary' : 'bg-primary/20'}`}
       >
         {/*
           left-0.5 pins the thumb's un-translated position to the track's left
@@ -219,15 +219,16 @@ function Toggle({ label, checked, onChange, disabled, hint }) {
           of the track instead of its edge and the translate-x below pushes
           it outside the pill.
 
-          bg-white (not bg-cream): this thumb needs to stay light-colored in
-          BOTH themes for contrast against the navy track. bg-cream is one of
-          the tokens index.css flips to a dark color in dark mode (since it's
-          used elsewhere as the page/card background), which would make this
-          thumb nearly invisible against the also-dark track. bg-white isn't
-          part of that override, so it stays a reliable light thumb always.
+          bg-onSidebar (a fixed, non-theme-reactive token) rather than bg-surface:
+          this thumb needs to stay light-colored in BOTH themes for contrast
+          against the blue track. bg-surface is theme-reactive (it's one of the
+          tokens index.css flips to a dark color in dark mode, since it's used
+          elsewhere as the card background), which would make a dark-mode thumb
+          nearly the same tone as the track. bg-onSidebar is fixed cream in both
+          themes, so it stays a reliable light thumb always.
         */}
         <span
-          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-onSidebar shadow transition-transform ${
             checked ? 'translate-x-4' : 'translate-x-0'
           }`}
         />

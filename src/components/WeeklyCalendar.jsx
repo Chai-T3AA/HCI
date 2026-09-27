@@ -76,15 +76,14 @@ export default function WeeklyCalendar() {
     setModalOpen(true);
   }
 
-  // --- Mobile swipe-to-navigate ---
-  // Native HTML5 drag-and-drop (used to move activities, see CalendarGrid)
-  // is a mouse-only API — it doesn't fire from touch gestures at all, which
-  // is a separate thing from "slide to change week/day" not existing yet.
-  // This is that: three plain touch handlers tracking where a touch started
-  // and ended, with no library. We only care about the *first* touch point
-  // (touches[0]) and a simple horizontal-distance-beats-vertical-distance
-  // check, so a vertical scroll inside the time grid is never mistaken for
-  // a swipe.
+  // --- Mobile swipe-to-navigate (Month view only) ---
+  // Week/Day view now handle their own edge-swipe inside CalendarGrid,
+  // because they have their own horizontal scroll region (7 day-columns
+  // don't fit a phone screen) and swiping needs to know that scroll
+  // position to tell "scroll to see more of this week" apart from "swipe
+  // to the next week" — see the long comment in CalendarGrid.jsx. Month
+  // view has no such horizontal scroll (it's a static 7-column grid that
+  // already fits), so its swipe-to-change-month stays simple, here.
   const touchStart = useRef(null); // { x, y } | null
 
   function handleTouchStart(e) {
@@ -104,7 +103,7 @@ export default function WeeklyCalendar() {
   }
 
   return (
-    <div className="flex flex-col h-full" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <div className="flex flex-col h-full">
       <CalendarHeader
         currentDate={currentDate}
         rangeLabel={rangeLabel}
@@ -121,16 +120,18 @@ export default function WeeklyCalendar() {
       />
 
       {view === 'month' ? (
-        <MonthView
-          monthDate={currentDate}
-          activities={filtered}
-          weekStartsOn={weekStartsOn}
-          onSelectDay={(day) => {
-            setCurrentDate(day);
-            setView('day');
-          }}
-          onEventClick={setDetailsActivity}
-        />
+        <div className="flex-1 min-h-0 flex flex-col" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+          <MonthView
+            monthDate={currentDate}
+            activities={filtered}
+            weekStartsOn={weekStartsOn}
+            onSelectDay={(day) => {
+              setCurrentDate(day);
+              setView('day');
+            }}
+            onEventClick={setDetailsActivity}
+          />
+        </div>
       ) : (
         <CalendarGrid
           days={daysToShow}
@@ -139,6 +140,7 @@ export default function WeeklyCalendar() {
           onSlotClick={(dateKey, startTime) => openAddModal(dateKey, startTime)}
           onEventClick={setDetailsActivity}
           onMoveActivity={(id, date, startTime) => moveActivity(id, { date, startTime })}
+          onSwipeWeek={step}
         />
       )}
 

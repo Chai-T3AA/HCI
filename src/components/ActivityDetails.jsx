@@ -16,22 +16,29 @@ export default function ActivityDetails({ activity, onClose, onToggleComplete, o
   const endTime = addHours(activity.startTime, activity.duration);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy/40 backdrop-blur-sm">
-      <div className="bg-cream w-full max-w-sm rounded-xl2 shadow-soft border border-navy/10 p-6">
+    // Scrollable OUTER wrapper, not just a centered box — on mobile, a
+    // `fixed inset-0 flex items-center` box with no scroll of its own can
+    // end up partly hidden behind the on-screen keyboard (or simply below
+    // a short viewport) with no way to reach the rest of it. Wrapping a
+    // `min-h-full flex items-center` INSIDE a scrollable outer div fixes
+    // that: the browser can always scroll to reveal whatever's cut off.
+    <div className="fixed inset-0 z-50 overflow-y-auto p-4 bg-primary/40 backdrop-blur-sm">
+      <div className="min-h-full flex items-center justify-center py-4">
+      <div className="bg-background w-full max-w-sm rounded-xl2 shadow-soft border border-border p-6">
         <div className="flex items-start justify-between">
-          <h2 className="font-serif text-xl text-navy pr-4">{activity.name}</h2>
-          <button onClick={onClose} className="text-navy/50 hover:text-navy shrink-0" aria-label="Close">
+          <h2 className="font-serif text-xl text-textPrimary pr-4">{activity.name}</h2>
+          <button onClick={onClose} className="text-textSecondary/75 hover:text-textPrimary shrink-0" aria-label="Close">
             <X size={20} />
           </button>
         </div>
 
-        <div className="mt-4 space-y-2.5 text-sm text-navy/80">
+        <div className="mt-4 space-y-2.5 text-sm text-textPrimary/80">
           <div className="flex items-center gap-2">
-            <Clock size={14} className="text-navy/50" />
+            <Clock size={14} className="text-textSecondary/75" />
             {activity.date} · {formatTime12(activity.startTime)} — {formatTime12(endTime)} ({activity.duration}h)
           </div>
           <div className="flex items-center gap-2">
-            <Tag size={14} className="text-navy/50" />
+            <Tag size={14} className="text-textSecondary/75" />
             {activity.category}
           </div>
           {activity.deadline && (
@@ -48,13 +55,13 @@ export default function ActivityDetails({ activity, onClose, onToggleComplete, o
         <div className="mt-6 flex items-center justify-between">
           <button
             onClick={() => onToggleComplete(activity.id)}
-            className="inline-flex items-center gap-2 text-sm font-medium text-current hover:text-navy"
+            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-textPrimary"
           >
             {activity.completed ? <CheckCircle2 size={16} /> : <Circle size={16} />}
             {activity.completed ? 'Completed' : 'Mark Complete'}
           </button>
           <div className="flex items-center gap-3">
-            <button onClick={() => onEdit(activity)} className="inline-flex items-center gap-1.5 text-sm font-medium text-navy hover:text-current">
+            <button onClick={() => onEdit(activity)} className="inline-flex items-center gap-1.5 text-sm font-medium text-textPrimary hover:text-primary">
               <Pencil size={14} /> Edit
             </button>
             <button
@@ -65,6 +72,7 @@ export default function ActivityDetails({ activity, onClose, onToggleComplete, o
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

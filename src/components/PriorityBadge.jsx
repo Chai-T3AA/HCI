@@ -9,9 +9,12 @@
 import { Flame, CircleDot, Minus } from 'lucide-react';
 
 const CONFIG = {
-  high: { label: 'HIGH', icon: Flame, className: 'bg-navy text-cream' },
-  medium: { label: 'MEDIUM', icon: CircleDot, className: 'bg-current text-cream' },
-  low: { label: 'LOW', icon: Minus, className: 'bg-haze/20 text-navy' },
+  // Fixed (theme-invariant) chocolate chip — the strongest, most "serious"
+  // tone available, reserved for the highest urgency level, same brand
+  // color as the sidebar so it reads as "most emphasis" in both themes.
+  high: { label: 'HIGH', icon: Flame, className: 'bg-sidebar text-onSidebar' },
+  medium: { label: 'MEDIUM', icon: CircleDot, className: 'bg-primary text-onAccent' },
+  low: { label: 'LOW', icon: Minus, className: 'bg-secondary/20 text-textPrimary' },
 };
 
 export default function PriorityBadge({ priority, size = 'sm' }) {

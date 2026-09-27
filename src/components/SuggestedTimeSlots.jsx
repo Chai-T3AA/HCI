@@ -18,7 +18,7 @@ const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 export default function SuggestedTimeSlots({ suggestions, onApply, selectedKey }) {
   if (!suggestions.length) {
     return (
-      <p className="text-sm text-navy/50 italic">
+      <p className="text-sm text-textSecondary/75 italic">
         No open slot found before the deadline — try shortening the duration or picking a later deadline.
       </p>
     );
@@ -34,10 +34,10 @@ export default function SuggestedTimeSlots({ suggestions, onApply, selectedKey }
             key={key}
             className={`rounded-xl border p-3.5 flex items-center justify-between gap-3 transition-colors ${
               s.isBestMatch
-                ? 'border-amber bg-amber/10'
+                ? 'border-accent bg-accent/10'
                 : isSelected
-                ? 'border-current bg-current/5'
-                : 'border-navy/10 bg-white/60'
+                ? 'border-primary bg-primary/5'
+                : 'border-border bg-surface/60'
             }`}
           >
             <div>
@@ -46,19 +46,20 @@ export default function SuggestedTimeSlots({ suggestions, onApply, selectedKey }
                   <Star size={11} fill="currentColor" /> Best Match
                 </span>
               )}
-              <p className="text-sm font-semibold text-navy">
+              <p className="text-sm font-semibold text-textPrimary">
                 {DAY_LABELS[s.date.getDay()]} · {s.date.getDate()}/{s.date.getMonth() + 1}
               </p>
-              <p className="text-xs text-navy/60 flex items-center gap-1 mt-0.5">
+              <p className="text-xs text-textSecondary/90 flex items-center gap-1 mt-0.5">
                 <Clock size={12} />
                 {formatTime12(s.startTime)} — {formatTime12(s.endTime)}
               </p>
-              <p className="text-[11px] text-navy/50 mt-1">Workload: {WORKLOAD_LABEL[s.workloadLevel]}</p>
+              <p className="text-[11px] text-textSecondary/75 mt-1">Workload: {WORKLOAD_LABEL[s.workloadLevel]}</p>
             </div>
             <button
+              type="button"
               onClick={() => onApply(s)}
               className={`text-xs font-semibold px-3.5 py-1.5 rounded-lg shrink-0 transition-colors ${
-                isSelected ? 'bg-current text-cream' : 'bg-navy text-cream hover:bg-navy-600'
+                isSelected ? 'bg-primary text-onAccent' : 'bg-primary text-onAccent hover:bg-primary-hover'
               }`}
             >
               {isSelected ? 'Selected' : 'Apply'}

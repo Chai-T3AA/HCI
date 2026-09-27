@@ -16,95 +16,57 @@ html, body, #root {
   height: 100%;
 }
 
-body {
-  @apply bg-cream text-navy font-sans antialiased transition-colors duration-200;
-}
-
 /**
- * DARK MODE
- * ---------
- * Rather than adding a `dark:` variant to every single className across ~20
- * component files, these rules override the handful of *utility classes*
- * that stand in for "page/card surface" and "primary text" throughout the
- * app (bg-cream, bg-white/NN, text-navy and its opacity variants,
- * border-navy/NN) whenever an ancestor has the `dark` class — which
- * SettingsContext toggles on <html> based on Settings > Appearance.
+ * THEME TOKENS
+ * ------------
+ * "Soft Winter/Cream" (light) and "Deep Cocoa/Ice Blue" (dark). Every
+ * component reads these through the Tailwind tokens defined in
+ * tailwind.config.js (bg-background, text-textPrimary, border-border, …)
+ * rather than a hardcoded hex, so both themes stay defined in exactly this
+ * one place. Values are R,G,B triplets (no `rgb()` wrapper) because
+ * Tailwind's `rgb(var(--x) / <alpha-value>)` pattern needs the bare
+ * components to splice in an opacity value for things like `bg-primary/50`.
  *
- * This works because a selector like `.dark .text-navy` (specificity 0,2,0)
- * always beats Tailwind's own `.text-navy` (0,1,0), regardless of source
- * order — so existing components don't need to change at all, they just
- * automatically theme.
- *
- * Deliberately NOT overridden: solid `bg-navy` (sidebar, primary buttons,
- * high-priority badges) and `text-cream`/`border-cream` (always used on top
- * of the navy sidebar, which stays navy in both themes) — those are brand
- * accents that should look the same regardless of light/dark, only the
- * cream *page* and navy *body text* need to flip.
+ * `.dark` is toggled on <html> by SettingsContext based on the user's
+ * Settings > Appearance choice (not the OS preference), so `:root` below
+ * is what a plain (non-dark) <html> gets, and `.dark` overrides it.
  */
-.dark body {
-  background-color: #0b1229;
+:root {
+  --color-background: 240 242 238; /* #F0F2EE */
+  --color-surface: 223 213 202; /* #DFD5CA */
+  --color-surface-elevated: 188 175 162; /* between surface and taupe accent */
+  --color-primary: 160 194 212; /* #A0C2D4 */
+  --color-primary-hover: 136 165 180; /* #A0C2D4, darkened ~15% */
+  --color-secondary: 112 142 160; /* #708EA0 */
+  --color-accent: 153 138 123; /* #998A7B */
+  --color-text-primary: 75 51 37; /* #4B3325 */
+  --color-text-secondary: 123 102 88; /* #7B6658 */
+  --color-border: 208 200 192; /* #D0C8C0 */
 }
 
-.dark .bg-cream {
-  background-color: #0b1229;
-}
-.dark .bg-cream\/50 {
-  background-color: rgba(20, 27, 61, 0.5);
-}
-.dark .bg-cream\/5 {
-  background-color: rgba(255, 255, 255, 0.04);
-}
-
-.dark .bg-white\/70,
-.dark .bg-white\/80,
-.dark .bg-white\/60 {
-  background-color: #141b3d;
+.dark {
+  --color-background: 30 24 21; /* #1E1815 */
+  --color-surface: 43 33 28; /* #2B211C */
+  --color-surface-elevated: 75 51 37; /* #4B3325 */
+  --color-primary: 111 157 180; /* #6F9DB4 */
+  --color-primary-hover: 124 167 188; /* #6F9DB4, lightened toward the highlight blue */
+  --color-secondary: 143 182 199; /* #8FB6C7 - highlight/hover blue */
+  --color-accent: 197 181 164; /* #C5B5A4 */
+  --color-text-primary: 240 242 238; /* #F0F2EE */
+  --color-text-secondary: 184 174 164; /* #B8AEA4 */
+  --color-border: 85 73 64; /* #554940 */
 }
 
-.dark .text-navy {
-  color: #f3ecdd;
-}
-.dark .text-navy\/80 {
-  color: rgba(243, 236, 221, 0.85);
-}
-.dark .text-navy\/70 {
-  color: rgba(243, 236, 221, 0.75);
-}
-.dark .text-navy\/60 {
-  color: rgba(243, 236, 221, 0.65);
-}
-.dark .text-navy\/50 {
-  color: rgba(243, 236, 221, 0.55);
-}
-.dark .text-navy\/40 {
-  color: rgba(243, 236, 221, 0.45);
-}
-.dark .text-navy\/30 {
-  color: rgba(243, 236, 221, 0.32);
-}
-
-.dark .border-navy,
-.dark .border-navy\/20,
-.dark .border-navy\/15,
-.dark .border-navy\/10,
-.dark .border-navy\/5 {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.dark .bg-navy\/5,
-.dark .bg-navy\/\[0\.02\] {
-  background-color: rgba(255, 255, 255, 0.04);
-}
-.dark .bg-navy\/10 {
-  background-color: rgba(255, 255, 255, 0.07);
+body {
+  @apply bg-background text-textPrimary font-sans antialiased transition-colors duration-200;
 }
 
 .dark .shadow-soft {
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.45);
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.15);
+::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--color-secondary) / 0.35);
 }
 
 /* Thin, unobtrusive scrollbars for the calendar grid and sidebar */
@@ -113,7 +75,6 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(16, 42, 107, 0.2);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-track {
@@ -128,11 +89,7 @@ body {
 /* Shared form-field styling used across AddActivityModal, Settings, etc. */
 @layer components {
   .input {
-    @apply w-full rounded-lg border border-navy/15 bg-white/80 px-3 py-2 text-sm text-navy
-      focus:outline-none focus:ring-2 focus:ring-current/40 focus:border-current transition-shadow;
+    @apply w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-textPrimary
+      focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-shadow;
   }
-}
-
-.dark .bg-white\/80 {
-  background-color: #141b3d;
 }
