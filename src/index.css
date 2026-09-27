@@ -19,8 +19,8 @@ html, body, #root {
 /**
  * THEME TOKENS
  * ------------
- * "Soft Winter/Cream" (light) and "Deep Cocoa/Ice Blue" (dark). Every
- * component reads these through the Tailwind tokens defined in
+ * "Soft Cream + Ocean Teal" (light) and "Charcoal + Deep Teal" (dark).
+ * Every component reads these through the Tailwind tokens defined in
  * tailwind.config.js (bg-background, text-textPrimary, border-border, …)
  * rather than a hardcoded hex, so both themes stay defined in exactly this
  * one place. Values are R,G,B triplets (no `rgb()` wrapper) because
@@ -30,31 +30,47 @@ html, body, #root {
  * `.dark` is toggled on <html> by SettingsContext based on the user's
  * Settings > Appearance choice (not the OS preference), so `:root` below
  * is what a plain (non-dark) <html> gets, and `.dark` overrides it.
+ *
+ * Dark mode is deliberately CHARCOAL-dominant, not blue-dominant: primary
+ * and secondary teal keep the exact same RGB in both modes (the brief gives
+ * one teal-blue accent value, used "sparingly" against charcoal, not a
+ * separate darker/bluer variant) — only the neutrals (background, surface,
+ * text) and the hover shade shift between modes.
  */
 :root {
-  --color-background: 240 242 238; /* #F0F2EE */
-  --color-surface: 223 213 202; /* #DFD5CA */
-  --color-surface-elevated: 188 175 162; /* between surface and taupe accent */
-  --color-primary: 160 194 212; /* #A0C2D4 */
-  --color-primary-hover: 136 165 180; /* #A0C2D4, darkened ~15% */
-  --color-secondary: 112 142 160; /* #708EA0 */
-  --color-accent: 153 138 123; /* #998A7B */
-  --color-text-primary: 75 51 37; /* #4B3325 */
-  --color-text-secondary: 123 102 88; /* #7B6658 */
-  --color-border: 208 200 192; /* #D0C8C0 */
+  --color-background: 244 245 241; /* #F4F5F1 */
+  --color-surface: 231 227 219; /* #E7E3DB */
+  --color-surface-elevated: 218 221 217; /* subtle cool-lean lift off the surface card */
+  --color-primary: 120 181 200; /* #78B5C8 */
+  --color-primary-hover: 95 163 184; /* #5FA3B8 */
+  --color-secondary: 156 184 192; /* #9CB8C0 */
+  --color-accent: 156 184 192; /* #9CB8C0 — same as secondary; the brief has one extra teal tone, not two */
+  --color-text-primary: 36 56 61; /* #24383D */
+  --color-text-secondary: 113 130 134; /* #718286 */
+  --color-border: 213 216 211; /* #D5D8D3 */
+  --color-sidebar: 41 74 82; /* #294A52 */
+  --color-sidebar-active: 58 93 101; /* #3A5D65 */
+  --color-sidebar-active-icon: 159 208 221; /* #9FD0DD */
+  --color-sidebar-inactive: 183 200 203; /* #B7C8CB */
+  --color-on-accent: 32 54 59; /* #20363B — dark ink for text on primary/priority chips */
 }
 
 .dark {
-  --color-background: 30 24 21; /* #1E1815 */
-  --color-surface: 43 33 28; /* #2B211C */
-  --color-surface-elevated: 75 51 37; /* #4B3325 */
-  --color-primary: 111 157 180; /* #6F9DB4 */
-  --color-primary-hover: 124 167 188; /* #6F9DB4, lightened toward the highlight blue */
-  --color-secondary: 143 182 199; /* #8FB6C7 - highlight/hover blue */
-  --color-accent: 197 181 164; /* #C5B5A4 */
-  --color-text-primary: 240 242 238; /* #F0F2EE */
-  --color-text-secondary: 184 174 164; /* #B8AEA4 */
-  --color-border: 85 73 64; /* #554940 */
+  --color-background: 23 28 29; /* #171C1D */
+  --color-surface: 37 44 44; /* #252C2C */
+  --color-surface-elevated: 48 56 56; /* #303838 */
+  --color-primary: 120 181 200; /* #78B5C8 — same teal as light, used sparingly per the brief */
+  --color-primary-hover: 134 193 210; /* #86C1D2 — lighter for hover, so it still pops against charcoal */
+  --color-secondary: 156 184 192; /* #9CB8C0 */
+  --color-accent: 156 184 192; /* #9CB8C0 */
+  --color-text-primary: 233 234 229; /* #E9EAE5 */
+  --color-text-secondary: 155 165 164; /* #9BA5A4 */
+  --color-border: 58 68 67; /* #3A4443 */
+  --color-sidebar: 29 48 50; /* #1D3032 */
+  --color-sidebar-active: 41 69 72; /* #294548 */
+  --color-sidebar-active-icon: 134 193 210; /* #86C1D2 */
+  --color-sidebar-inactive: 169 183 184; /* #A9B7B8 */
+  --color-on-accent: 23 35 38; /* #172326 */
 }
 
 body {

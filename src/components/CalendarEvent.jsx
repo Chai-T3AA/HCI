@@ -36,13 +36,13 @@
  *    rely purely on our own handlers, so there's nothing left to race.
  */
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Repeat } from 'lucide-react';
 import { formatTime12, addHours } from '../utils/dateUtils';
 
 const PRIORITY_STYLE = {
-  high: 'bg-sidebar text-onSidebar border-sidebar',
-  medium: 'bg-primary text-onAccent border-primary',
-  low: 'bg-secondary/80 text-onAccent border-secondary',
+  high: 'bg-priorityHigh text-onSidebar border-priorityHigh',
+  medium: 'bg-priorityMedium text-onAccent border-priorityMedium',
+  low: 'bg-priorityLow text-onAccent border-priorityLow',
 };
 
 // True once, on mount, per device — not per render. A device with a mouse
@@ -63,6 +63,13 @@ export default function CalendarEvent({
   const [draggableEnabled] = useState(hasMouse);
   const buttonRef = useRef(null);
 
+  // A fixed-time activity (whether a lone "Fixed time" item or one
+  // occurrence of a recurring series) can only be rescheduled through the
+  // Edit form, never by dragging it around the grid — dragging bypasses
+  // the "which occurrences does this apply to" scope prompt entirely,
+  // which is exactly the guardrail a fixed/recurring commitment needs.
+  const isLocked = Boolean(activity.seriesId || activity.fixedTime);
+
   // Real (non-passive) touchmove listener — see the file-header comment
   // for why the React `onTouchMove` prop can't reliably preventDefault.
   useEffect(() => {
@@ -76,17 +83,29 @@ export default function CalendarEvent({
   return (
     <button
       ref={buttonRef}
-      draggable={draggableEnabled}
-      onDragStart={(e) => onDragStart(e, activity)}
+      draggable={draggableEnabled && !isLocked}
+      onDragStart={(e) => {
+        if (isLocked) {
+          e.preventDefault(); // belt-and-suspenders — draggable=false should already stop this
+          return;
+        }
+        onDragStart(e, activity);
+      }}
       onDragEnd={onDragEnd} // fires even if the drop lands outside a valid column — used to clear the drag-preview ghost
-      onTouchStart={(e) => onTouchDragStart?.(e, activity)}
-      onTouchEnd={onTouchDragEnd}
+      onTouchStart={(e) => {
+        if (isLocked) return; // no touch-drag either — click through to Edit instead
+        onTouchDragStart?.(e, activity);
+      }}
+      onTouchEnd={(e) => {
+        if (isLocked) return;
+        onTouchDragEnd?.(e);
+      }}
       onClick={(e) => {
         e.stopPropagation();
         onClick(activity);
       }}
-      className={`absolute rounded-md border text-left px-2 py-1 overflow-hidden shadow-sm cursor-grab active:cursor-grabbing
-        transition-transform hover:z-20 hover:scale-[1.02] ${PRIORITY_STYLE[activity.priority]} ${
+      className={`absolute rounded-md border text-left px-2 py-1 overflow-hidden shadow-sm
+        transition-transform hover:z-20 hover:scale-[1.02] ${isLocked ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'} ${PRIORITY_STYLE[activity.priority]} ${
         activity.completed ? 'opacity-50 line-through' : ''
       }`}
       style={{
@@ -95,14 +114,20 @@ export default function CalendarEvent({
         left: `calc(${leftPct}% + 2px)`,
         width: `calc(${widthPct}% - 4px)`,
       }}
-      title={activity.name}
+      title={isLocked ? `${activity.name} — fixed time, use Edit to reschedule` : activity.name}
     >
       {!isSmall && (
         <p className="text-[10px] opacity-80 leading-tight">
           {formatTime12(activity.startTime)} – {formatTime12(addHours(activity.startTime, activity.duration))}
         </p>
       )}
-      <p className={`font-semibold leading-tight truncate ${isSmall ? 'text-[10px]' : 'text-xs'}`}>{activity.name}</p>
+      <p className={`font-semibold leading-tight truncate flex items-center gap-1 ${isSmall ? 'text-[10px]' : 'text-xs'}`}>
+        {/* Marks a fixed-time / recurring block at a glance — see fixedTime in scheduling.js's rebalanceWeek doc comment. */}
+        {(activity.seriesId || activity.fixedTime) && (
+          <Repeat size={isSmall ? 8 : 10} className="opacity-75 shrink-0" />
+        )}
+        <span className="truncate">{activity.name}</span>
+      </p>
       {!isSmall && (
         <p className="text-[10px] opacity-80 leading-tight flex items-center gap-1">
           {activity.priority.toUpperCase()} · {activity.duration}h

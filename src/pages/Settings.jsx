@@ -13,7 +13,7 @@ import { useState } from 'react';
 import { useSettings } from '../context/SettingsContext';
 
 export default function Settings() {
-  const { settings, set, setMaxWorkloadPerDay } = useSettings();
+  const { settings, set, setMaxWorkloadPerDay, setTargetSleepHours } = useSettings();
   const [justSaved, setJustSaved] = useState(false);
 
   // Every `set()` call re-renders this page immediately (it's the same
@@ -44,7 +44,7 @@ export default function Settings() {
           label="Dark mode"
           checked={settings.darkMode}
           onChange={(v) => handleChange('darkMode', v)}
-          hint="Swaps the light Soft Winter theme for the Deep Cocoa/Ice Blue dark theme."
+          hint="Swaps the cream/teal light theme for the charcoal/deep-teal dark theme."
         />
       </Section>
 
@@ -79,6 +79,8 @@ export default function Settings() {
         <DefaultDurationField value={settings.defaultDuration} onChange={(v) => handleChange('defaultDuration', v)} />
 
         <MaxWorkloadField value={settings.maxWorkloadPerDay} onChange={setMaxWorkloadPerDay} />
+
+        <SleepHoursField value={settings.targetSleepHours} onChange={setTargetSleepHours} />
       </Section>
     </div>
   );
@@ -176,6 +178,42 @@ function MaxWorkloadField({ value, onChange }) {
           and the Workload Overview chart.
         </p>
       )}
+    </Field>
+  );
+}
+
+/**
+ * Target sleep hours — used by "Rebalance Week" (Calendar page) to work out
+ * how many hours of each day are actually free to schedule into, instead of
+ * treating the whole 7am–10pm window as fair game. Same draft-string +
+ * clamp-on-blur pattern as MaxWorkloadField/DefaultDurationField above.
+ */
+function SleepHoursField({ value, onChange }) {
+  const [draft, setDraft] = useState(String(value));
+
+  function commit(raw) {
+    const num = Number(raw);
+    const clamped = raw === '' || Number.isNaN(num) ? value : Math.min(12, Math.max(4, Math.round(num * 2) / 2));
+    onChange(clamped);
+    setDraft(String(clamped));
+  }
+
+  return (
+    <Field label="Target sleep (hours per night)">
+      <input
+        type="number"
+        min="4"
+        max="12"
+        step="0.5"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={(e) => commit(e.target.value)}
+        className="input max-w-[140px]"
+      />
+      <p className="text-xs text-textSecondary/75 mt-1">
+        Used by "Rebalance Week" on the Calendar page to leave enough of each day free for sleep, instead of packing
+        every waking hour.
+      </p>
     </Field>
   );
 }

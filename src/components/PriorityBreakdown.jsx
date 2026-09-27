@@ -9,7 +9,7 @@
  */
 import PriorityBadge from './PriorityBadge';
 
-const BAR_CLASS = { high: 'bg-sidebar', medium: 'bg-primary', low: 'bg-secondary' };
+const BAR_CLASS = { high: 'bg-priorityHigh', medium: 'bg-priorityMedium', low: 'bg-priorityLow' };
 
 export default function PriorityBreakdown({ activities }) {
   const totals = activities.reduce(

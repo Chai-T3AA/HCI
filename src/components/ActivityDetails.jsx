@@ -7,13 +7,41 @@
  * to AddActivityModal (opened in edit mode by the parent Calendar page)
  * rather than duplicating the form here.
  */
-import { X, Clock, Tag, AlertTriangle, CheckCircle2, Circle, Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { X, Clock, Tag, AlertTriangle, CheckCircle2, Circle, Pencil, Trash2, Repeat } from 'lucide-react';
 import PriorityBadge from './PriorityBadge';
+import SeriesScopeDialog from './SeriesScopeDialog';
+import { useActivities } from '../context/ActivityContext';
 import { formatTime12, addHours, deadlineLabel } from '../utils/dateUtils';
 
-export default function ActivityDetails({ activity, onClose, onToggleComplete, onEdit, onDelete }) {
+export default function ActivityDetails({ activity, onClose, onToggleComplete, onEdit }) {
+  const { deleteActivity, deleteSeries } = useActivities();
+  const [scopeOpen, setScopeOpen] = useState(false);
+
   if (!activity) return null;
   const endTime = addHours(activity.startTime, activity.duration);
+
+  // A plain (non-series) activity deletes immediately, same as before. One
+  // that belongs to a recurring series asks which occurrences to remove
+  // first — see SeriesScopeDialog.
+  function handleDeleteClick() {
+    if (activity.seriesId) {
+      setScopeOpen(true);
+    } else {
+      deleteActivity(activity.id);
+      onClose();
+    }
+  }
+
+  function handleScopeChoose(scope) {
+    if (scope === 'this') {
+      deleteActivity(activity.id);
+    } else {
+      deleteSeries(activity.seriesId, scope === 'following' ? { fromDate: activity.date } : {});
+    }
+    setScopeOpen(false);
+    onClose();
+  }
 
   return (
     // Scrollable OUTER wrapper, not just a centered box — on mobile, a
@@ -26,7 +54,10 @@ export default function ActivityDetails({ activity, onClose, onToggleComplete, o
       <div className="min-h-full flex items-center justify-center py-4">
       <div className="bg-background w-full max-w-sm rounded-xl2 shadow-soft border border-border p-6">
         <div className="flex items-start justify-between">
-          <h2 className="font-serif text-xl text-textPrimary pr-4">{activity.name}</h2>
+          <h2 className="font-serif text-xl text-textPrimary pr-4 flex items-center gap-2">
+            {activity.name}
+            {activity.seriesId && <Repeat size={14} className="text-textSecondary/75 shrink-0" title="Part of a recurring series" />}
+          </h2>
           <button onClick={onClose} className="text-textSecondary/75 hover:text-textPrimary shrink-0" aria-label="Close">
             <X size={20} />
           </button>
@@ -65,7 +96,7 @@ export default function ActivityDetails({ activity, onClose, onToggleComplete, o
               <Pencil size={14} /> Edit
             </button>
             <button
-              onClick={() => onDelete(activity.id)}
+              onClick={handleDeleteClick}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700"
             >
               <Trash2 size={14} /> Delete
@@ -74,6 +105,13 @@ export default function ActivityDetails({ activity, onClose, onToggleComplete, o
         </div>
       </div>
       </div>
+
+      <SeriesScopeDialog
+        open={scopeOpen}
+        title="Delete which events?"
+        onChoose={handleScopeChoose}
+        onCancel={() => setScopeOpen(false)}
+      />
     </div>
   );
 }

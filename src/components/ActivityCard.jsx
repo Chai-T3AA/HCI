@@ -7,14 +7,39 @@
  * from CalendarEvent (which renders the same data positioned inside the
  * time grid) because the two need very different layouts.
  */
-import { Clock, AlertTriangle, CheckCircle2, Circle, Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Clock, AlertTriangle, CheckCircle2, Circle, Pencil, Trash2, Repeat } from 'lucide-react';
 import PriorityBadge from './PriorityBadge';
+import SeriesScopeDialog from './SeriesScopeDialog';
+import { useActivities } from '../context/ActivityContext';
 import { formatTime12, addHours, deadlineLabel, toDateKey } from '../utils/dateUtils';
 
-export default function ActivityCard({ activity, onToggleComplete, onEdit, onDelete }) {
+export default function ActivityCard({ activity, onToggleComplete, onEdit }) {
+  const { deleteActivity, deleteSeries } = useActivities();
+  const [scopeOpen, setScopeOpen] = useState(false);
   const endTime = addHours(activity.startTime, activity.duration);
   const isUrgentDeadline =
     activity.deadline && !activity.completed && activity.deadline <= toDateKey(new Date(Date.now() + 86400000));
+
+  // Same series-aware delete behavior as ActivityDetails: a one-off
+  // activity deletes immediately, one belonging to a recurring series asks
+  // which occurrences first.
+  function handleDeleteClick() {
+    if (activity.seriesId) {
+      setScopeOpen(true);
+    } else {
+      deleteActivity(activity.id);
+    }
+  }
+
+  function handleScopeChoose(scope) {
+    if (scope === 'this') {
+      deleteActivity(activity.id);
+    } else {
+      deleteSeries(activity.seriesId, scope === 'following' ? { fromDate: activity.date } : {});
+    }
+    setScopeOpen(false);
+  }
 
   return (
     <div
@@ -32,8 +57,9 @@ export default function ActivityCard({ activity, onToggleComplete, onEdit, onDel
         </button>
 
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold text-textPrimary truncate ${activity.completed ? 'line-through' : ''}`}>
+          <p className={`text-sm font-semibold text-textPrimary truncate flex items-center gap-1.5 ${activity.completed ? 'line-through' : ''}`}>
             {activity.name}
+            {activity.seriesId && <Repeat size={11} className="text-textSecondary/60 shrink-0" title="Part of a recurring series" />}
           </p>
           <div className="flex items-center gap-1.5 text-xs text-textSecondary/90 mt-0.5">
             <Clock size={12} />
@@ -61,11 +87,18 @@ export default function ActivityCard({ activity, onToggleComplete, onEdit, onDel
           <button onClick={() => onEdit(activity)} className="text-textSecondary/75 hover:text-primary" aria-label="Edit">
             <Pencil size={14} />
           </button>
-          <button onClick={() => onDelete(activity.id)} className="text-textSecondary/75 hover:text-red-600" aria-label="Delete">
+          <button onClick={handleDeleteClick} className="text-textSecondary/75 hover:text-red-600" aria-label="Delete">
             <Trash2 size={14} />
           </button>
         </div>
       </div>
+
+      <SeriesScopeDialog
+        open={scopeOpen}
+        title="Delete which events?"
+        onChoose={handleScopeChoose}
+        onCancel={() => setScopeOpen(false)}
+      />
     </div>
   );
 }

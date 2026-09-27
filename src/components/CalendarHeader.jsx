@@ -7,7 +7,7 @@
  * "+ New Activity" action. Purely controlled — all state lives in the
  * parent (WeeklyCalendar) and is passed down as props.
  */
-import { ChevronLeft, ChevronRight, Search, SlidersHorizontal, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, SlidersHorizontal, Plus, Shuffle } from 'lucide-react';
 import { MONTH_NAMES } from '../utils/dateUtils';
 
 const VIEWS = ['day', 'week', 'month'];
@@ -25,6 +25,7 @@ export default function CalendarHeader({
   priorityFilter,
   onPriorityFilter,
   onAdd,
+  onRebalance,
 }) {
   return (
     <div className="border-b border-border pb-4 mb-4">
@@ -58,12 +59,21 @@ export default function CalendarHeader({
           ))}
         </div>
 
-        <button
-          onClick={onAdd}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-onAccent hover:bg-primary-600 transition-colors"
-        >
-          <Plus size={16} /> New Activity
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onRebalance}
+            title="Redistribute this week's deadline-bound work to even out your busiest days, without cutting into your target sleep hours."
+            className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg border border-border text-textPrimary hover:bg-textPrimary/5 transition-colors"
+          >
+            <Shuffle size={5} /> Rebalance Week
+          </button>
+          <button
+            onClick={onAdd}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-onAccent hover:bg-primary-hover transition-colors"
+          >
+            <Plus size={16} /> New Activity
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 mt-3">

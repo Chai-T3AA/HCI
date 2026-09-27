@@ -1,16 +1,19 @@
 /**
  * TAILWIND CONFIG
  * ----------------
- * TimeWise's color system, "Soft Winter/Cream" (light) and "Deep Cocoa/Ice
- * Blue" (dark) — see the design brief this was built from. Every themeable
- * color is a CSS variable defined in index.css (`:root` for light, `.dark`
- * for dark) and referenced here via `rgb(var(--x) / <alpha-value>)`, so:
+ * TimeWise's color system, "Soft Cream + Ocean Teal" (light) and "Charcoal +
+ * Deep Teal" (dark) — see the design brief this was built from. Every
+ * themeable color is a CSS variable defined in index.css (`:root` for
+ * light, `.dark` for dark) and referenced here via
+ * `rgb(var(--x) / <alpha-value>)`, so:
  *   1. Switching a color for BOTH modes at once means editing exactly one
  *      place (index.css), not hunting through ~20 component files.
  *   2. Every token still supports Tailwind's opacity modifiers, e.g.
  *      `bg-primary/50`, exactly like a plain hex color would.
- * A few tokens are deliberately fixed (not variables) because they're
- * meant to look the same in both themes — see the comments below.
+ *
+ * Unlike the previous palette, the SIDEBAR is also theme-reactive here (the
+ * brief gives it distinct light/dark teal shades, not one fixed color), so
+ * sidebar/onAccent are CSS variables too now, not fixed hexes.
  */
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -31,25 +34,38 @@ export default {
           hover: 'rgb(var(--color-primary-hover) / <alpha-value>)',
         },
         secondary: 'rgb(var(--color-secondary) / <alpha-value>)', // secondary interactive elements / highlights
-        accent: 'rgb(var(--color-accent) / <alpha-value>)', // subtle warm accents, "Best Match", selected chips
+        accent: 'rgb(var(--color-accent) / <alpha-value>)', // subtle accents, "Best Match", selected chips
         textPrimary: 'rgb(var(--color-text-primary) / <alpha-value>)', // headings, important text
         textSecondary: 'rgb(var(--color-text-secondary) / <alpha-value>)', // secondary/muted text
         border: 'rgb(var(--color-border) / <alpha-value>)',
+        // Deep teal sidebar — its own distinct light/dark shades per the
+        // brief (not the same as `background`/`surface`), plus its own
+        // "active nav item" and "inactive label" tones so the sidebar reads
+        // correctly without borrowing `accent` for that job.
+        sidebar: 'rgb(var(--color-sidebar) / <alpha-value>)',
+        sidebarActive: 'rgb(var(--color-sidebar-active) / <alpha-value>)',
+        sidebarActiveIcon: 'rgb(var(--color-sidebar-active-icon) / <alpha-value>)',
+        sidebarInactive: 'rgb(var(--color-sidebar-inactive) / <alpha-value>)',
+        // Small color chips (priority badges, primary buttons) carry their
+        // own background and need dark ink text to read on a mid-toned teal
+        // — the brief gives slightly different ink shades per theme, so
+        // this is a variable too, not one fixed hex.
+        onAccent: 'rgb(var(--color-on-accent) / <alpha-value>)',
 
         // --- Fixed tokens (identical in both themes) ---
-        // The sidebar is a brand anchor, not a "page surface" — it stays the
-        // same deep chocolate-brown regardless of light/dark, matching how
-        // the app already behaved before this theme (sidebar never flipped).
-        sidebar: '#4B3325',
-        onSidebar: '#F0F2EE', // text/icons sitting on the sidebar
-        // Small color chips (priority badges, "Best Match" pill) carry their
-        // own background and need one text color that reads on all of them;
-        // rather than swap it per-theme, it's fixed dark ink, chosen because
-        // every chip color in this palette is light/mid-toned enough for it.
-        onAccent: '#4B3325',
-        // Semantic status colors — kept distinct from the brand blues/browns
-        // per the brief ("harmonize, don't replace semantic meaning"), but
-        // muted to match the palette's soft, non-neon register.
+        // Light, near-neutral text for sitting on the sidebar — the sidebar
+        // itself is a dark-ish teal in BOTH page themes, so this doesn't
+        // need to flip the way page text does.
+        onSidebar: '#F4F5F1',
+        // Priority system — one fixed 3-step scale (the brief lists these
+        // once, not per light/dark), independent of primary/secondary so
+        // priority meaning stays visually consistent regardless of theme.
+        priorityHigh: '#52717A',
+        priorityMedium: '#78B5C8',
+        priorityLow: '#A9B8B5',
+        // Semantic status colors — kept distinct from the teal/charcoal
+        // system per the brief ("keep the existing priority concept... keep
+        // semantic meaning"), muted to match the palette's soft register.
         danger: {
           DEFAULT: '#B3423A',
           50: '#F8E7E4',
@@ -64,7 +80,7 @@ export default {
         sans: ['"Inter"', 'sans-serif'],
       },
       boxShadow: {
-        soft: '0 4px 20px -4px rgba(75, 51, 37, 0.14)',
+        soft: '0 4px 20px -4px rgba(23, 28, 29, 0.14)',
       },
       borderRadius: {
         xl2: '1.25rem',

@@ -88,6 +88,18 @@ export default function CalendarGrid({ days, activities, maxWorkloadPerDay, onSl
   const [draggingDuration, setDraggingDuration] = useState(null);
   const [dragPreview, setDragPreview] = useState(null); // { dateKey, top } | null
 
+  // Grab offset (px) for MOUSE drag: how far below the block's own top edge
+  // the user actually clicked when they grabbed it. Without this, the
+  // preview/drop math (snapToSlot) treated the cursor's Y position as the
+  // block's new TOP — so grabbing an activity anywhere except its very top
+  // pixel made it visibly jump downward the instant the drag started (by
+  // however far down you'd grabbed it), landing far below where you meant
+  // to drop it. Captured once in onDragStart, subtracted from the cursor's
+  // Y on every subsequent dragover/drop so the block keeps the same visual
+  // offset from the cursor throughout the drag, matching how dragging
+  // normally feels.
+  const dragGrabOffsetRef = useRef(0);
+
   // Keep the current-time indicator live (section 18).
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
@@ -107,7 +119,7 @@ export default function CalendarGrid({ days, activities, maxWorkloadPerDay, onSl
     const activityId = e.dataTransfer.getData('text/activity-id');
     if (!activityId) return;
     const container = e.currentTarget.getBoundingClientRect();
-    const snappedHour = snapToSlot(e.clientY, container.top);
+    const snappedHour = snapToSlot(e.clientY - dragGrabOffsetRef.current, container.top);
     onMoveActivity(activityId, dateKey, decimalHourToTimeString(snappedHour));
     setDragPreview(null);
     setDraggingDuration(null);
@@ -131,7 +143,14 @@ export default function CalendarGrid({ days, activities, maxWorkloadPerDay, onSl
     // the two gesture systems (drag-an-activity vs swipe-the-week) would
     // otherwise fight over the same finger motion.
     e.stopPropagation();
-    touchDragRef.current = { activityId: activity.id, duration: activity.duration };
+    // Same grab-offset fix as the mouse path below: remember how far below
+    // the block's own top the finger actually landed, so the block doesn't
+    // jump to put its top exactly under the finger the instant the drag
+    // starts (which reads as "it starts far below" when you grab anywhere
+    // but the very top edge of the block).
+    const rect = e.currentTarget.getBoundingClientRect();
+    const grabOffsetY = e.touches[0].clientY - rect.top;
+    touchDragRef.current = { activityId: activity.id, duration: activity.duration, grabOffsetY };
     setDraggingDuration(activity.duration);
   }
 
@@ -140,11 +159,15 @@ export default function CalendarGrid({ days, activities, maxWorkloadPerDay, onSl
     e.stopPropagation();
     e.preventDefault(); // don't let the page scroll while actively dragging
     const touch = e.touches[0];
+    // Hit-testing uses the raw finger position (that's genuinely where the
+    // finger is), but the SNAPPED position uses the finger position minus
+    // the grab offset, so the block's top — not the finger — is what lands
+    // on a clean half-hour line under the finger's original grab point.
     const column = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('[data-day-col]');
     if (!column) return;
     const dateKey = column.dataset.dayCol;
     const columnTop = column.getBoundingClientRect().top;
-    const snappedHour = snapToSlot(touch.clientY, columnTop);
+    const snappedHour = snapToSlot(touch.clientY - touchDragRef.current.grabOffsetY, columnTop);
     setDragPreview({ dateKey, top: (snappedHour - GRID_START_HOUR) * HOUR_HEIGHT });
   }
 
@@ -156,7 +179,7 @@ export default function CalendarGrid({ days, activities, maxWorkloadPerDay, onSl
     if (column) {
       const dateKey = column.dataset.dayCol;
       const columnTop = column.getBoundingClientRect().top;
-      const snappedHour = snapToSlot(touch.clientY, columnTop);
+      const snappedHour = snapToSlot(touch.clientY - touchDragRef.current.grabOffsetY, columnTop);
       onMoveActivity(touchDragRef.current.activityId, dateKey, decimalHourToTimeString(snappedHour));
     }
     touchDragRef.current = null;
@@ -225,7 +248,7 @@ export default function CalendarGrid({ days, activities, maxWorkloadPerDay, onSl
         <div className="flex flex-col h-full" style={{ width: 64 + days.length * dayColWidth, minWidth: '100%' }}>
       {/* Day column headers: date, today emphasis, workload total */}
       <div className="flex border-b border-border">
-        <div className="w-16 shrink-0 left-0 bg-background z-20" />
+        <div className="w-16 shrink-0 sticky left-0 bg-background z-20" />
         {days.map((day) => {
           const dateKey = toDateKey(day);
           const hours = getHoursForDate(activities, dateKey);
@@ -303,7 +326,7 @@ export default function CalendarGrid({ days, activities, maxWorkloadPerDay, onSl
                 onDragOver={(e) => {
                   e.preventDefault(); // required for onDrop to fire at all — see MDN's HTML5 DnD docs
                   const columnTop = e.currentTarget.getBoundingClientRect().top;
-                  const snappedHour = snapToSlot(e.clientY, columnTop);
+                  const snappedHour = snapToSlot(e.clientY - dragGrabOffsetRef.current, columnTop);
                   setDragPreview({ dateKey, top: (snappedHour - GRID_START_HOUR) * HOUR_HEIGHT });
                 }}
                 onDragLeave={() => setDragPreview((prev) => (prev?.dateKey === dateKey ? null : prev))}
@@ -361,9 +384,15 @@ export default function CalendarGrid({ days, activities, maxWorkloadPerDay, onSl
                     onClick={onEventClick}
                     onDragStart={(e, a) => {
                       e.dataTransfer.setData('text/activity-id', a.id);
+                      // Grab offset — see dragGrabOffsetRef's declaration
+                      // above for why this is needed. e.currentTarget here
+                      // is the activity's own <button>, so this rect is the
+                      // block's own top, not the column's.
+                      dragGrabOffsetRef.current = e.clientY - e.currentTarget.getBoundingClientRect().top;
                       setDraggingDuration(a.duration); // so the ghost box below is sized to match
                     }}
                     onDragEnd={() => {
+                      dragGrabOffsetRef.current = 0;
                       setDragPreview(null);
                       setDraggingDuration(null);
                     }}

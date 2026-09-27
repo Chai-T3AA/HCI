@@ -45,7 +45,7 @@ export default function App() {
               >
                 <Menu size={20} />
               </button>
-              <Clock3 size={18} className="text-accent" />
+              <Clock3 size={18} className="text-primary" />
               <span className="font-serif text-lg text-textPrimary">TimeWise</span>
             </header>
 

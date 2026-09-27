@@ -68,7 +68,7 @@ export default function Sidebar({ open = false, onClose }) {
 
         {/* Logo / wordmark */}
         <div className={`px-6 py-7 flex items-center gap-2 border-b border-onSidebar/10 ${collapsed ? 'md:justify-center' : ''}`}>
-          <Clock3 size={22} className="text-accent shrink-0" />
+          <Clock3 size={22} className="text-sidebarActiveIcon shrink-0" />
           {!collapsed && <span className="font-serif text-xl tracking-wide">TimeWise</span>}
         </div>
 
@@ -86,8 +86,8 @@ export default function Sidebar({ open = false, onClose }) {
                   collapsed ? 'md:justify-center md:px-0' : ''
                 } ${
                   isActive
-                    ? 'bg-accent/20 text-accent border border-accent/40'
-                    : 'text-onSidebar/80 hover:bg-onSidebar/10 hover:text-onSidebar'
+                    ? 'bg-sidebarActive text-sidebarActiveIcon'
+                    : 'text-sidebarInactive hover:bg-onSidebar/10 hover:text-onSidebar'
                 }`
               }
             >
@@ -102,19 +102,19 @@ export default function Sidebar({ open = false, onClose }) {
           <div className="mx-4 mb-4 rounded-xl border border-onSidebar/10 bg-onSidebar/5 p-4">
             <p className="text-xs uppercase tracking-wider text-onSidebar/60 mb-2">Weekly Progress</p>
             <div className="flex items-end justify-between">
-              <span className="font-serif text-2xl text-accent">{stats.completion}%</span>
+              <span className="font-serif text-2xl text-sidebarActiveIcon">{stats.completion}%</span>
               <span className="text-xs text-onSidebar/60">{stats.hoursCompleted}h / {stats.hoursPlanned}h</span>
             </div>
             <div className="mt-2 h-1.5 w-full rounded-full bg-onSidebar/10 overflow-hidden">
-              <div className="h-full bg-accent rounded-full transition-all" style={{ width: `${stats.completion}%` }} />
+              <div className="h-full bg-sidebarActiveIcon rounded-full transition-all" style={{ width: `${stats.completion}%` }} />
             </div>
           </div>
         )}
 
         {/* User profile footer */}
         <div className={`px-4 py-4 border-t border-onSidebar/10 flex items-center gap-3 ${collapsed ? 'md:justify-center' : ''}`}>
-          <div className="h-9 w-9 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center shrink-0">
-            <User size={16} className="text-accent" />
+          <div className="h-9 w-9 rounded-full bg-sidebarActive flex items-center justify-center shrink-0">
+            <User size={16} className="text-sidebarActiveIcon" />
           </div>
           {!collapsed && (
             <div className="min-w-0">

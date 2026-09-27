@@ -15,9 +15,11 @@ import CalendarGrid from './CalendarGrid';
 import MonthView from './MonthView';
 import AddActivityModal from './AddActivityModal';
 import ActivityDetails from './ActivityDetails';
+import RebalanceSummary from './RebalanceSummary';
 import { useActivities } from '../context/ActivityContext';
 import { useSettings } from '../context/SettingsContext';
 import { addDays, getWeekDays, formatWeekRange, toDateKey } from '../utils/dateUtils';
+import { rebalanceWeek } from '../utils/scheduling';
 
 // How far (px) a touch has to travel horizontally, and how much more
 // horizontal than vertical movement it needs, before it counts as a
@@ -26,7 +28,7 @@ import { addDays, getWeekDays, formatWeekRange, toDateKey } from '../utils/dateU
 const SWIPE_THRESHOLD_PX = 60;
 
 export default function WeeklyCalendar() {
-  const { activities, deleteActivity, toggleComplete, moveActivity } = useActivities();
+  const { activities, toggleComplete, moveActivity } = useActivities();
   const { settings, weekStartsOn } = useSettings();
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -39,6 +41,7 @@ export default function WeeklyCalendar() {
   const [defaultDate, setDefaultDate] = useState(null);
   const [defaultStartTime, setDefaultStartTime] = useState(null);
   const [detailsActivity, setDetailsActivity] = useState(null);
+  const [rebalanceResult, setRebalanceResult] = useState(null); // { moves, unplaced, dailyCap } | null
 
   const filtered = useMemo(() => {
     return activities.filter((a) => {
@@ -74,6 +77,18 @@ export default function WeeklyCalendar() {
     setDefaultDate(activity.date);
     setDefaultStartTime(null);
     setModalOpen(true);
+  }
+
+  // "Rebalance Week" — always operates on the full 7-day week CONTAINING
+  // currentDate, regardless of whether Day/Week/Month view is active
+  // (daysToShow above is just 1 day in Day view, which wouldn't be enough
+  // context to balance anything against). See rebalanceWeek's own doc
+  // comment in utils/scheduling.js for exactly what it will and won't move.
+  function handleRebalance() {
+    const weekDays = getWeekDays(currentDate, weekStartsOn);
+    const result = rebalanceWeek(weekDays, activities, settings, new Date());
+    result.moves.forEach((m) => moveActivity(m.id, { date: m.toDate, startTime: m.toTime }));
+    setRebalanceResult(result);
   }
 
   // --- Mobile swipe-to-navigate (Month view only) ---
@@ -117,7 +132,10 @@ export default function WeeklyCalendar() {
         priorityFilter={priorityFilter}
         onPriorityFilter={setPriorityFilter}
         onAdd={() => openAddModal(toDateKey(currentDate))}
+        onRebalance={handleRebalance}
       />
+
+      <RebalanceSummary result={rebalanceResult} onClose={() => setRebalanceResult(null)} />
 
       {view === 'month' ? (
         <div className="flex-1 min-h-0 flex flex-col" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
@@ -160,10 +178,6 @@ export default function WeeklyCalendar() {
           setDetailsActivity(null);
         }}
         onEdit={openEditModal}
-        onDelete={(id) => {
-          deleteActivity(id);
-          setDetailsActivity(null);
-        }}
       />
     </div>
   );

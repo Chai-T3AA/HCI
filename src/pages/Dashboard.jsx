@@ -21,7 +21,7 @@ import { addDays, getWeekDays, formatWeekRangeLong, DAY_NAMES, toDateKey } from 
 import { getWeeklyStats } from '../utils/workloadUtils';
 
 export default function Dashboard() {
-  const { activities, deleteActivity, toggleComplete } = useActivities();
+  const { activities, toggleComplete } = useActivities();
   const { settings, weekStartsOn } = useSettings();
   const [weekAnchor, setWeekAnchor] = useState(new Date());
   const [modalOpen, setModalOpen] = useState(false);
@@ -95,7 +95,7 @@ export default function Dashboard() {
                 setEditingActivity(null);
                 setModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-primary text-onAccent hover:bg-primary-600"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-primary text-onAccent hover:bg-primary-hover"
             >
               <Plus size={14} /> Add Activity
             </button>
@@ -121,7 +121,6 @@ export default function Dashboard() {
                           activity={a}
                           onToggleComplete={toggleComplete}
                           onEdit={openEdit}
-                          onDelete={deleteActivity}
                         />
                       ))}
                     </div>
@@ -139,10 +138,6 @@ export default function Dashboard() {
         onClose={() => setDetailsActivity(null)}
         onToggleComplete={toggleComplete}
         onEdit={openEdit}
-        onDelete={(id) => {
-          deleteActivity(id);
-          setDetailsActivity(null);
-        }}
       />
     </div>
   );

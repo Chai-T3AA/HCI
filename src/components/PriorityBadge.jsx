@@ -8,13 +8,13 @@
  */
 import { Flame, CircleDot, Minus } from 'lucide-react';
 
+// Fixed 3-step priority scale (priorityHigh/Medium/Low, tailwind.config.js)
+// — one scale, the same in both themes, independent of primary/secondary so
+// "how urgent is this" stays visually consistent regardless of light/dark.
 const CONFIG = {
-  // Fixed (theme-invariant) chocolate chip — the strongest, most "serious"
-  // tone available, reserved for the highest urgency level, same brand
-  // color as the sidebar so it reads as "most emphasis" in both themes.
-  high: { label: 'HIGH', icon: Flame, className: 'bg-sidebar text-onSidebar' },
-  medium: { label: 'MEDIUM', icon: CircleDot, className: 'bg-primary text-onAccent' },
-  low: { label: 'LOW', icon: Minus, className: 'bg-secondary/20 text-textPrimary' },
+  high: { label: 'HIGH', icon: Flame, className: 'bg-priorityHigh text-onSidebar' },
+  medium: { label: 'MEDIUM', icon: CircleDot, className: 'bg-priorityMedium text-onAccent' },
+  low: { label: 'LOW', icon: Minus, className: 'bg-priorityLow text-onAccent' },
 };
 
 export default function PriorityBadge({ priority, size = 'sm' }) {

@@ -19,6 +19,7 @@
  */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { initialActivities } from '../data/mockData';
+import { generateRecurringDates } from '../utils/recurrence';
 
 const STORAGE_KEY = 'timewise.activities.v1';
 const ActivityContext = createContext(null);
@@ -106,6 +107,82 @@ export function ActivityProvider({ children }) {
     setActivities((prev) => prev.map((a) => (a.id === id ? { ...a, date, startTime } : a)));
   }, []);
 
+  /**
+   * Creates a "Fixed time" activity that repeats weekly/biweekly across a
+   * date range (e.g. a class that meets every Monday for a semester).
+   * Unlike a normal add, this materializes ONE concrete activity row per
+   * occurrence up front (rather than storing an abstract "repeat" rule and
+   * expanding it at render time) — simplest thing that works at this app's
+   * scale (a 6-month weekly series is ~26 rows), and it means the calendar,
+   * Tasks page, drag-and-drop and rebalance all keep working against plain
+   * activity objects with no special-casing anywhere else in the app.
+   *
+   * All generated occurrences share one `seriesId` (used by updateSeries /
+   * deleteSeries below to act on the group) and are always `fixedTime:
+   * true` — a fixed-time item is never something Rebalance Week should move,
+   * whether or not it happens to carry a deadline.
+   *
+   * @param {Object} baseActivity - everything BUT `date`/`id`/`seriesId`
+   *   (name, startTime, duration, priority, category, etc.) — `baseActivity.date`
+   *   is used only as the series' anchor/start date.
+   * @param {Object} recurrence - { freq: 'weekly'|'biweekly', daysOfWeek: number[], until: 'YYYY-MM-DD' }
+   * @returns {{ seriesId: string, occurrences: object[] }}
+   */
+  const addRecurringActivity = useCallback((baseActivity, recurrence) => {
+    const seriesId = generateId();
+    const dates = generateRecurringDates({
+      startDate: baseActivity.date,
+      daysOfWeek: recurrence.daysOfWeek,
+      freq: recurrence.freq,
+      until: recurrence.until,
+    });
+
+    const { date: _ignoredDate, ...rest } = baseActivity;
+    const occurrences = dates.map((date) => ({
+      ...rest,
+      date,
+      id: generateId(),
+      seriesId,
+      fixedTime: true,
+      completed: false,
+    }));
+
+    setActivities((prev) => [...prev, ...occurrences]);
+    return { seriesId, occurrences };
+  }, []);
+
+  /**
+   * Applies `changes` to every occurrence of a series, optionally scoped to
+   * "this and following" via `fromDate` (omit for "all events"). `changes`
+   * should never include `date` — each occurrence keeps its own date; only
+   * the Edit form's "this event only" path (plain `updateActivity`) may
+   * change a single occurrence's date.
+   */
+  const updateSeries = useCallback((seriesId, changes, { fromDate } = {}) => {
+    const { date: _ignoredDate, id: _ignoredId, seriesId: _ignoredSeriesId, ...safeChanges } = changes || {};
+    setActivities((prev) =>
+      prev.map((a) => {
+        if (a.seriesId !== seriesId) return a;
+        if (fromDate && a.date < fromDate) return a;
+        return { ...a, ...safeChanges };
+      })
+    );
+  }, []);
+
+  /**
+   * Deletes every occurrence of a series, optionally scoped to "this and
+   * following" via `fromDate` (omit for "all events").
+   */
+  const deleteSeries = useCallback((seriesId, { fromDate } = {}) => {
+    setActivities((prev) =>
+      prev.filter((a) => {
+        if (a.seriesId !== seriesId) return true; // keep unrelated activities
+        if (fromDate && a.date < fromDate) return true; // keep past occurrences when scoped
+        return false; // drop this occurrence
+      })
+    );
+  }, []);
+
   const value = {
     activities,
     addActivity,
@@ -113,6 +190,9 @@ export function ActivityProvider({ children }) {
     deleteActivity,
     toggleComplete,
     moveActivity,
+    addRecurringActivity,
+    updateSeries,
+    deleteSeries,
   };
 
   return <ActivityContext.Provider value={value}>{children}</ActivityContext.Provider>;

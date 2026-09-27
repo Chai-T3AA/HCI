@@ -17,7 +17,7 @@ import { toDateKey } from '../utils/dateUtils';
 const TABS = ['All Tasks', 'Upcoming', 'Completed', 'High Priority'];
 
 export default function Tasks() {
-  const { activities, deleteActivity, toggleComplete } = useActivities();
+  const { activities, toggleComplete } = useActivities();
   const [tab, setTab] = useState('All Tasks');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
@@ -52,7 +52,7 @@ export default function Tasks() {
             setEditingActivity(null);
             setModalOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-onAccent hover:bg-primary-600"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-onAccent hover:bg-primary-hover"
         >
           <Plus size={16} /> New Activity
         </button>
@@ -77,7 +77,7 @@ export default function Tasks() {
       ) : (
         <div className="grid md:grid-cols-2 gap-3">
           {filtered.map((a) => (
-            <ActivityCard key={a.id} activity={a} onToggleComplete={toggleComplete} onEdit={openEdit} onDelete={deleteActivity} />
+            <ActivityCard key={a.id} activity={a} onToggleComplete={toggleComplete} onEdit={openEdit} />
           ))}
         </div>
       )}

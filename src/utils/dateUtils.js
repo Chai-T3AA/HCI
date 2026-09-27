@@ -36,6 +36,22 @@ export function addDays(date, amount) {
 }
 
 /**
+ * Adds calendar months (not a fixed 30 days) — used for the "Fixed time"
+ * recurrence duration presets (1/3/6/12 months). Clamps day-of-month so
+ * e.g. Jan 31 + 1 month doesn't silently roll into March (setMonth would
+ * otherwise turn "Feb 31" into "Mar 3").
+ */
+export function addMonths(date, amount) {
+  const d = new Date(date);
+  const day = d.getDate();
+  d.setDate(1); // avoid month-rollover surprises while changing the month
+  d.setMonth(d.getMonth() + amount);
+  const lastDayOfTargetMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, lastDayOfTargetMonth));
+  return d;
+}
+
+/**
  * Returns the date that starts the week containing `date`.
  * `weekStartsOn` follows JS's Date.getDay() numbering (0 = Sunday, 1 = Monday,
  * ... 6 = Saturday) and defaults to Monday — but every caller that has

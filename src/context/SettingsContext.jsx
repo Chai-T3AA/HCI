@@ -27,6 +27,13 @@ const DEFAULTS = {
   notifyOverload: true,
   defaultDuration: 1,
   maxWorkloadPerDay: 8, // hours; validated to stay strictly within (0, 24) — see setMaxWorkloadPerDay
+  // Used by "Rebalance Week" (Calendar page) to work out how many hours of
+  // each day are actually available to schedule into — the scheduling
+  // window (7am–10pm, 15h) minus this, roughly, rather than assuming every
+  // waking hour is fair game. Also just a genuinely useful thing for a
+  // student to be able to say explicitly. Clamped 4–12h — see
+  // setTargetSleepHours.
+  targetSleepHours: 8,
   darkMode: false,
 };
 
@@ -74,10 +81,20 @@ export function SettingsProvider({ children }) {
     setSettings((prev) => ({ ...prev, maxWorkloadPerDay: clamped }));
   }, []);
 
+  // Clamped setter, same pattern as setMaxWorkloadPerDay: 4–12 hours in
+  // half-hour steps. Below 4 or above 12 isn't a realistic sleep target and
+  // would make the rebalance math (usable hours = window − sleep) produce
+  // either a near-zero or a negative usable window.
+  const setTargetSleepHours = useCallback((hours) => {
+    const clamped = Math.min(12, Math.max(4, Math.round(hours * 2) / 2));
+    setSettings((prev) => ({ ...prev, targetSleepHours: clamped }));
+  }, []);
+
   const value = {
     settings,
     set,
     setMaxWorkloadPerDay,
+    setTargetSleepHours,
     // Derived convenience value: dateUtils.getWeekDays/startOfWeek expect
     // Date.getDay()'s numbering (0 = Sunday, 1 = Monday), not a boolean.
     weekStartsOn: settings.weekStartsMonday ? 1 : 0,
